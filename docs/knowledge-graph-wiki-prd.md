@@ -21,160 +21,163 @@ The Knowledge Graph Wiki Tool aims to solve a critical gap in knowledge manageme
 
 This tool will allow users to create wiki pages with rich text and media, while simultaneously building a structured knowledge graph where entities and their relationships are visually represented. The bidirectional synchronization between these views will ensure consistency and provide multiple ways to interact with the same knowledge base.
 
+*Important:* We annotate each requirement with V0.7, V1, V2, V3 and V?. These are version-indicators.
+
 ## Functional Requirements (MVP)
 
 ### 1. User Authentication and Management
-- User registration and authentication system
-- User profile management
-- Team/workspace creation and management
-- Role-based permissions for collaborative editing
+- V0.7 User registration and authentication system
+- V1 User profile management
+- V1 Team/workspace creation and management
+- V3 Role-based permissions for collaborative editing
 
 ### 2. Knowledge Graph Schema Management
-- Pre-defined schema loading and visualization
-- Entity and relationship types defined by the schema
-- Property definition for entities and relationships based on schema
+- V0.7 Pre-defined schema loading and visualization
+- V0.7 Entity and relationship types defined by the schema
+- V0.7 Property definition for entities and relationships based on schema
 
 ### 3. Wiki Content Management
-- Rich text editing with Lexical editor
-- Support for formatting (headings, lists, bold, italic, etc.)
-- Media embedding (images, videos)
-- Hyperlink support (internal and external)
-- Wiki page creation, editing, and deletion
-- Automatic saving of content changes
+- V0.7 Rich text editing with Lexical editor
+- V0.7 Support for formatting (headings, lists, bold, italic, etc.)
+- V0.7 Media embedding (images, videos)
+- V0.7 Hyperlink support (internal and external)
+- V0.7 Wiki page creation, editing, and deletion
+- V0.7 Automatic saving of content changes
 
 ### 4. Knowledge Graph Visualization and Editing
-- Interactive graph visualization using React Flow
-- Entity creation through direct graph manipulation
-- Relationship creation through connecting entities
-- Entity and relationship property editing via form interface
-- Support for extra fields on entities presented as forms in the UI
-- Zooming and panning navigation
-- Different detail levels at different zoom levels
-- Visual indicators for entity completeness/importance
+- V0.7 Interactive graph visualization using React Flow
+- V0.7 Entity creation through direct graph manipulation
+- V0.7 Relationship creation through connecting entities
+- V0.7 Entity and relationship property editing via form interface
+- V? Support for extra fields on entities presented as forms in the UI
+- V0.7 Zooming and panning navigation
+- V1 Different detail levels at different zoom levels
+- V0.7 Visual indicators for entity completeness/importance
 
 ### 5. Unidirectional Wiki-to-Graph Synchronization
-- Entity creation through wiki-links in text
-- Automatic graph updates when wiki content changes
-- No automatic wiki content updates when graph changes (one-way synchronization only)
-- Consistent entity reference maintenance between views
+- V0.7 Entity creation through wiki-links in text
+- V0.7 Automatic graph updates when wiki content changes
+- V0.7 No automatic wiki content updates when graph changes (one-way synchronization only): graph changes result in todo-items for checking/updating the wiki content
+- V0.7 Consistent entity reference maintenance between views
 
 ### 6. AI Assistance Features
-- Relationship suggestion system (displayed as dotted lines)
-- Entity type suggestion for new entities
-- Summary/description generation suggestions
-- Explicit user approval required for all AI suggestions
+- V1 Relationship suggestion system (displayed as dotted lines)
+- V1 Entity type suggestion for new entities
+- V1 Summary/description generation suggestions
+- V1 Explicit user approval required for all AI suggestions
 
 ### 7. Document Processing
-- Document upload functionality (PDF, DOCX, TXT, EPUB, Markdown)
-- Image and audio file upload for knowledge extraction
-- Entity and relationship extraction from documents
-- User review and approval interface for extracted knowledge
-- Source document reference maintenance
+- V0.7 Document upload functionality (PDF, DOCX, TXT, EPUB, Markdown)
+- V2 knowledge extraction from text documents
+- V2 Image and audio file upload for knowledge extraction
+- V2 Entity and relationship extraction from documents
+- V2 User review and approval interface for extracted knowledge
+- V2 Source document reference maintenance
 
 ### 8. Knowledge Completeness Tracking
-- To-do list generation for incomplete entities/relationships
-- Completeness criteria based on schema definitions
-- Visual indicators for completeness status
-- Filtering and sorting of to-do items
+- V0.7 To-do list generation for incomplete entities/relationships
+- V0.7 Completeness criteria based on schema definitions
+- V0.7 Visual indicators for completeness status
+- V1 Filtering and sorting of to-do items
 
 ### 9. Real-time Collaboration
-- Concurrent editing of wiki content
-- Concurrent editing of graph structure
-- User presence indicators
-- Change attribution to specific users
-- Conflict resolution mechanisms
+- V1 Concurrent editing of wiki content
+- V1 Concurrent editing of graph structure
+- V1 User presence indicators
+- V2 Change attribution to specific users
+- V2 Conflict resolution mechanisms
 
 ### 10. TypeDB Integration
-- TypeDB connection and query management
-- Schema-compliant data storage and retrieval
-- Support for complex relationship types with properties
-- Efficient query patterns for graph visualization and navigation
+- V0.7 TypeDB connection and query management
+- V0.7 Schema-compliant data storage and retrieval
+- V2 Support for complex relationship types with properties
+- V2 Efficient query patterns for graph visualization and navigation
 
 ### 11. Commenting and Discussion
-- Comment creation on entities and relationships
-- Threaded discussions
-- Notification system for new comments
-- Comment editing and deletion
-- @mentions to reference users in comments
+- V1 Comment creation on entities and relationships
+- V1 Threaded discussions
+- V2 Notification system for new comments
+- V1 Comment editing and deletion
+- V1 @mentions to reference users in comments
 
 ## Non-Functional Requirements (MVP)
 
 ### 1. Performance Requirements
-- Page load time: Initial application load under 3 seconds on standard broadband connection
-- Graph rendering: Smooth visualization and interaction with up to 500 nodes
-- Wiki editor responsiveness: No perceptible lag during typing or formatting
-- Document processing: Upload and extraction processing within 60 seconds for documents up to 10MB
-- API response time: 95% of API requests complete within 500ms
-- Real-time collaboration: Changes propagate to all users within 2 seconds
+- V1 Page load time: Initial application load under 3 seconds on standard broadband connection
+- V1 Graph rendering: Smooth visualization and interaction with up to 500 nodes
+- V0.7 Wiki editor responsiveness: No perceptible lag during typing or formatting
+- V2 Document processing: Upload and extraction processing within 60 seconds for documents up to 10MB
+- V1 API response time: 95% of API requests complete within 500ms
+- V1 Real-time collaboration: Changes propagate to all users within 2 seconds
 
 ### 2. Scalability Requirements
-- Support for knowledge graphs with up to 10,000 entities in MVP
-- Support for up to 20 concurrent users editing the same knowledge base
-- Support for knowledge bases up to 1GB in total size (excluding media)
+- V1 Support for knowledge graphs with up to 10,000 entities in MVP
+- V1 Support for up to 20 concurrent users editing the same knowledge base
+- V1 Support for knowledge bases up to 1GB in total size (excluding media)
 
 ### 3. Security Requirements
-- User authentication with industry-standard protocols (OAuth 2.0)
-- Data encryption in transit (HTTPS/TLS)
-- Team-based and role-based access control for knowledge base editing
-- Input validation to prevent injection attacks
-- Protection against common web vulnerabilities (XSS, CSRF)
-- Secure handling of AI service API keys
+- V0.7 User authentication with industry-standard protocols (OAuth 2.0)
+- V0.7 Data encryption in transit (HTTPS/TLS)
+- Team-based (V0.7) and role-based (V2) access control for knowledge base editing
+- V0.7 Input validation to prevent injection attacks
+- V0.7 Protection against common web vulnerabilities (XSS, CSRF)
+- V1 Secure handling of AI service API keys
 
 ### 4. Usability Requirements
-- Intuitive interface requiring minimal training for domain experts
-- Consistent design language throughout the application
-- Optimized for desktop use (1280×720 minimum resolution)
-- Limited mobile functionality (wiki viewing/editing only, no graph editing)
-- Clear visual feedback for user actions
-- Optional audio feedback for important actions and notifications
-- Helpful error messages that suggest resolution steps
-- Tooltips and contextual help for complex features
-- Undo/redo functionality for both wiki and graph edits
+- V0.7 Intuitive interface requiring minimal training for domain experts
+- V1 Consistent design language throughout the application
+- V0.7 Optimized for desktop use (1280×720 minimum resolution)
+- V1 Limited mobile functionality (wiki viewing/editing only, no graph editing)
+- V0.7 Clear visual feedback for user actions
+- V2 Optional audio feedback for important actions and notifications
+- V0.7 Helpful error messages that suggest resolution steps
+- V1 Tooltips and contextual help for complex features
+- V1 Undo/redo functionality for both wiki and graph edits
 
 ### 5. Reliability Requirements
-- System availability of 99.5% during business hours
-- Automatic saving of user changes to prevent data loss
-- Graceful handling of network interruptions with offline editing capability where possible
-- Automatic recovery from temporary TypeDB connection issues
-- Comprehensive error logging for troubleshooting
+- V0.7 System availability of 99.5% during business hours
+- V0.7 Automatic saving of user changes to prevent data loss
+- V2 Graceful handling of network interruptions with offline editing capability where possible
+- V2 Automatic recovery from temporary TypeDB connection issues
+- V0.7 Comprehensive error logging for troubleshooting
 
 ### 6. Compatibility Requirements
-- Support for modern web browsers: Chrome (latest 2 versions), Firefox (latest 2 versions), Safari (latest 2 versions), Edge (latest 2 versions)
-- No dependency on browser plugins or extensions
-- Support for standard image formats (JPG, PNG, GIF, SVG)
-- Support for standard video formats (MP4, WebM)
-- Support for standard audio formats (MP3, WAV)
+- V0.7 Support for modern web browsers: Chrome (latest 2 versions), Firefox (latest 2 versions), Safari (latest 2 versions), Edge (latest 2 versions)
+- V0.7 No dependency on browser plugins or extensions
+- V0.7 Support for standard image formats (JPG, PNG, GIF, SVG)
+- V1 Support for standard video formats (MP4, WebM)
+- V0.7 Support for standard audio formats (MP3, WAV)
 - Support for document formats:
-  - PDF
-  - DOCX
-  - TXT
-  - EPUB
-  - Markdown (.md, .markdown)
+  - V0.7 PDF
+  - V1 DOCX
+  - V0.7 TXT
+  - V1 EPUB
+  - V0.7 Markdown (.md, .markdown)
 
 ### 7. Localization Requirements
-- Support for English and Dutch languages
-- UTF-8 encoding for proper handling of special characters
-- Design accommodates future localization (string externalization, flexible layouts)
+- V1 Support for English and Dutch languages
+- V0.7 UTF-8 encoding for proper handling of special characters
+- V0.7 Design accommodates future localization (string externalization, flexible layouts)
 
 ### 8. Compliance Requirements
-- GDPR compliance for user data handling
-- WCAG 2.1 AA level accessibility compliance
-- Proper attribution for open-source components
-- Compliance with TypeDB licensing requirements
+- V0.7 GDPR compliance for user data handling
+- V1 WCAG 2.1 AA level accessibility compliance
+- V0.7 Proper attribution for open-source components
+- V0.7 Compliance with TypeDB licensing requirements
 
 ### 9. Maintainability Requirements
-- Well-documented codebase following industry best practices
-- Modular architecture allowing for component updates
-- Comprehensive test coverage (unit, integration, E2E with CodeceptJS)
-- Consistent code style and formatting
-- Dependency management with clear versioning
+- V0.7 Well-documented codebase following industry best practices
+- V0.7 Modular architecture allowing for component updates
+- V0.7 Comprehensive test coverage (unit, integration, E2E with CodeceptJS)
+- V0.7 Consistent code style and formatting
+- V0.7 Dependency management with clear versioning
 
 ### 10. Deployment Requirements
-- Containerized application components for consistent deployment
-- Configuration via environment variables
-- Automated build and deployment pipeline
-- Minimal downtime during updates
-- Ability to roll back to previous versions if issues are detected
+- V0.7 Containerized application components for consistent deployment
+- V0.7 Configuration via environment variables
+- V0.7 Automated build and deployment pipeline
+- V1 Minimal downtime during updates
+- V1 Ability to roll back to previous versions if issues are detected
 
 ## User Interaction and Design Goals
 
@@ -184,9 +187,9 @@ The Knowledge Graph Wiki Tool should provide a clean, intuitive, and visually ap
 
 ### Key Interaction Paradigms
 
-1. **Split-View Interface**: The primary interface should feature a flexible split-view layout with the wiki content editor on one side and the knowledge graph visualization on the other. Users should be able to adjust the split ratio or focus on either view as needed.
+1. V0.7 **Split-View Interface**: The primary interface should feature a flexible split-view layout with the wiki content editor on one side and the knowledge graph visualization on the other. Users should be able to adjust the split ratio or focus on either view as needed.
 
-2. **Direct Manipulation with Grid Snapping**: The graph visualization should support intuitive direct manipulation, allowing users to:
+2. V0.7 **Direct Manipulation with Grid Snapping**: The graph visualization should support intuitive direct manipulation, allowing users to:
    - Drag entities to reposition them (with automatic snapping to a grid)
    - Click to select and view/edit properties
    - Edit labels and short descriptions directly in the graph
@@ -195,56 +198,56 @@ The Knowledge Graph Wiki Tool should provide a clean, intuitive, and visually ap
    - Click and drag the canvas for panning
    - Trigger auto-layout of the graph via a dedicated control
 
-3. **Wiki-Link Entity Creation with Type Specification**: Within the Lexical text editor, users should be able to create new entities by using a special wiki-link syntax (e.g., [[Entity Name]]) with optional type specification (e.g., [[type:Entity Name]]) or through a contextual menu option.
+3. V0.7 **Wiki-Link Entity Creation with Type Specification**: Within the Lexical text editor, users should be able to create new entities by using a special wiki-link syntax (e.g., [[Entity Name]]) with optional type specification (e.g., [[type:Entity Name]]) or through a contextual menu option.
 
-4. **Side-Panel Property Editing**: Entity and relationship properties should be edited through clean, structured forms that appear in a side panel when an element is selected.
+4. V0.7 **Side-Panel Property Editing**: Entity and relationship properties should be edited through clean, structured forms that appear in a side panel when an element is selected.
 
-5. **Suggestion Review Interface**: AI-generated suggestions should appear in a non-intrusive but visible manner (e.g., dotted lines for relationships, highlight for entity type suggestions) with clear accept/reject controls.
+5. V1 **Suggestion Review Interface**: AI-generated suggestions should appear in a non-intrusive but visible manner (e.g., dotted lines for relationships, highlight for entity type suggestions) with clear accept/reject controls.
 
-6. **To-Do List Workflow**: The to-do list should be accessible through a dedicated panel or tab, allowing users to quickly identify and address incomplete knowledge elements.
+6. V0.7 **To-Do List Workflow**: The to-do list should be accessible through a dedicated panel or tab, allowing users to quickly identify and address incomplete knowledge elements.
 
-7. **Contextual Document Upload**: Document uploading should be available as a contextual feature of entities and relationships, allowing users to attach and extract knowledge from documents directly in the context of the relevant graph elements.
+7. V0.7 **Contextual Document Upload**: Document uploading should be available as a contextual feature of entities and relationships, allowing users to attach and extract knowledge from documents directly in the context of the relevant graph elements.
 
 ### Core Screens/Views
 
-1. **Main Editor View**: The primary interface with split wiki/graph visualization, toolbars, and property panels.
+1. V0.7 **Main Editor View**: The primary interface with split wiki/graph visualization, toolbars, and property panels.
 
-2. **Knowledge Base Dashboard**: Entry point showing available knowledge bases, team access information, and creation/import options.
+2. V1 **Knowledge Base Dashboard**: Entry point showing available knowledge bases, team access information, and creation/import options.
 
-3. **User/Team Management**: Interface for managing users, teams, and permissions.
+3. V2 **User/Team Management**: Interface for managing users, teams, and permissions.
 
-4. **To-Do List View**: Dedicated interface for viewing and addressing incomplete knowledge elements.
+4. V0.7 **To-Do List View**: Dedicated interface for viewing and addressing incomplete knowledge elements.
 
-5. **Settings & Configuration**: Interface for adjusting user preferences and system settings.
+5. V2 **Settings & Configuration**: Interface for adjusting user preferences and system settings.
 
-6. **Publishing View**: Interface for configuring and generating published versions of the knowledge base.
+6. V0.7 **Publishing View**: Interface for configuring and generating published versions of the knowledge base.
 
 ### Accessibility Aspirations
 
-- All functionality should be accessible via keyboard navigation
-- Multiple color schemes (light mode, dark mode, and high contrast)
-- Interactive elements should have appropriate focus states
-- Screen reader compatibility for all core functions
-- Support for system font size adjustments
-- Audio feedback option for important actions
+- V1 All functionality should be accessible via keyboard navigation
+- V1 Multiple color schemes (light mode, dark mode, and high contrast)
+- V0.7 Interactive elements should have appropriate focus states
+- V1 Screen reader compatibility for all core functions
+- V1 Support for system font size adjustments
+- V2 Audio feedback option for important actions
 
 ### Branding Considerations
 
-- The interface should use a color palette centered on black and white, with pastel colors for accents and data types
-- Typography should use sans-serif fonts for UI elements and a modern, low-contrast serif font for user-entered content
-- Visual elements should convey precision and clarity
-- The overall aesthetic should feel contemporary and trustworthy
+- V0.7 The interface should use a color palette centered on black and white, with pastel colors for accents and data types
+- V0.7 Typography should use sans-serif fonts for UI elements and a modern, low-contrast serif font for user-entered content
+- V0.7 Visual elements should convey precision and clarity
+- V0.7 The overall aesthetic should feel contemporary and trustworthy
 
 ### Target Devices/Platforms
 
-- Primary focus on desktop web browsers with minimum 1400×900 resolution
-- Limited functionality on tablets and mobile devices (wiki viewing/editing only)
-- Optimized for mouse/keyboard interaction, with touch support as a secondary consideration
-- No dependency on mobile-specific features
+- V0.7 Primary focus on desktop web browsers with minimum 1400×900 resolution
+- V2 Limited functionality on tablets and mobile devices (wiki viewing/editing only)
+- V0.7 Optimized for mouse/keyboard interaction, with touch support as a secondary consideration
+- V0.7 No dependency on mobile-specific features
 
 ## Technical Assumptions
 
-### Technology Stack
+### V0.7 Technology Stack
 
 #### Frontend
 - **Framework**: React 19
