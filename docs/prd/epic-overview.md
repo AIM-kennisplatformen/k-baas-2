@@ -1,0 +1,237 @@
+# Epic Overview
+
+- **V0.7 Epic 1: Project Foundation & Infrastructure**
+  - Goal: Establish the foundational infrastructure, repository setup, and core application framework to enable efficient development of subsequent features.
+  - V0.7 Story 1: As a developer, I want a properly configured repository with both frontend and backend projects so that I can efficiently develop and test the application.
+    - V0.7 Set up repository with appropriate project structure
+    - V0.7 Configure JavaScript for frontend
+    - V0.7 Configure Python for backend
+    - V0.7 Set up linting and formatting rules
+    - V0.7 Configure basic CI/CD with GitHub Actions
+  - V0.7 Story 2: As a developer, I want a basic frontend application shell with React 19, Tailwind 4, and Shadcn/ui so that I can start building UI components.
+    - V0.7 Initialize React application with JavaScript
+    - V0.7 Configure Tailwind and Shadcn/ui
+    - V0.7 Create basic layout components
+    - V1 Implement theme switching (light/dark/high contrast)
+    - V0.7 Set up Jotai for state management
+  - V0.7 Story 3: As a developer, I want a basic backend API with FastAPI so that I can start implementing data storage and retrieval.
+    - V0.7 Set up FastAPI application structure
+    - V0.7 Integrate provided TypeDB connection code
+    - V0.7 Implement basic health check endpoints
+    - V0.7 Set up authentication framework
+    - V0.7 Configure CORS and security headers
+  - V0.7 Story 4: As a developer, I want Socket.io integration between frontend and backend so that I can implement real-time collaboration features.
+    - V0.7 Set up python-socketio on the backend
+    - V0.7 Configure Socket.io client on the frontend
+    - V0.7 Implement basic connection handling
+    - V0.7 Create test endpoints to verify real-time communication
+
+- **V1 Epic 2: User Authentication & Management**
+  - Goal: Implement a secure and user-friendly authentication system with team-based access control.
+  - V0.7 Story 1: As a user, I want to register for an account so that I can access the knowledge graph wiki tool.
+    - V0.7 Create registration form UI
+    - V0.7 Implement backend registration endpoint
+    - V0.7 Add validation for user inputs
+    - V1 Implement email verification flow
+    - V0.7 Store user data securely
+  - V0.7 Story 2: As a user, I want to log in to my account so that I can access my knowledge bases.
+    - V0.7 Create login form UI
+    - V0.7 Implement JWT-based authentication
+    - V0.7 Create secure token handling
+    - V1 Implement "remember me" functionality
+    - V1 Add protection against brute force attacks
+  - V1 Story 3: As a user, I want to create and manage teams so that I can collaborate with others.
+    - V1 Create team management UI
+    - V1 Implement team CRUD operations
+    - V1 Add user invitation system
+    - V1 Implement team role assignment
+    - V1 Create team settings page
+  - V3 Story 4: As a team administrator, I want to manage permissions for team members so that I can control access to knowledge bases.
+    - V3 Create permission management UI
+    - V3 Implement role-based access control
+    - V3 Add permission checking to API endpoints
+    - V2 Create audit logging for permission changes
+    - V3 Implement permission inheritance rules
+
+- **V0.7 Epic 3: Knowledge Base Creation & Schema Management**
+  - Goal: Enable users to create knowledge bases with predefined schemas and manage their properties.
+  - V1 Story 1: As a user, I want to create a new knowledge base so that I can start organizing my domain knowledge.
+    - V1 Create knowledge base creation UI
+    - V1 Implement knowledge base CRUD operations
+    - V1 Add team access assignment
+    - V1 Create knowledge base settings page
+    - V1 Implement knowledge base listing and search
+  - V0.7 Story 2: As a developer, I want to implement Pydantic schema definition and TypeDB schema generation so that knowledge bases have proper structure.
+    - V0.7 Create Pydantic schema definition system
+    - V0.7 Implement TypeDB schema generation from Pydantic models
+    - V0.7 Add validation for schema definitions
+    - V2 Create schema versioning system
+    - V2 Implement schema migration utilities
+  - V0.7 Story 3: As a user, I want to select from predefined schemas when creating a knowledge base so that I can quickly start with an appropriate structure.
+    - V0.7 Create schema selection UI
+    - V0.7 Implement schema preview functionality
+    - V0.7 Add schema metadata display
+    - V0.7 Create schema application process
+    - V0.7 Implement initial knowledge base setup based on schema
+
+- **V0.7 Epic 4: Wiki Content Management**
+  - Goal: Implement a rich, user-friendly wiki editing experience with support for various content types.
+  - V0.7 Story 1: As a user, I want to create and edit wiki pages with a rich text editor so that I can document my knowledge.
+    - V0.7 Integrate Lexical editor
+    - V0.7 Implement basic text formatting controls
+    - V0.7 Add support for headings, lists, and other structures
+    - V0.7 Create autosave functionality
+    - V1 Implement draft and publishing workflow
+  - V0.7 Story 2: As a user, I want to embed media in wiki pages so that I can include visual and audio content.
+    - V0.7 Implement media upload functionality
+    - V0.7 Add support for image embedding and resizing
+    - V0.7 Implement video and audio embedding
+    - V1 Create media browser for reusing existing media
+    - V1 Add media metadata editing
+  - V0.7 Story 3: As a user, I want to create wiki-links with optional type specification so that I can connect wiki content to the knowledge graph.
+    - V0.7 Implement wiki-link syntax parsing
+    - V0.7 Create entity creation from wiki-links
+    - V0.7 Add type specification support (e.g., [[type:Entity Name]])
+    - V0.7 Implement entity reference resolution
+    - V0.7 Create visual indicators for linked entities
+
+- **V0.7 Epic 5: Knowledge Graph Visualization & Editing**
+  - Goal: Create an intuitive, interactive graph visualization that allows users to directly manipulate knowledge structures.
+  - V0.7 Story 1: As a user, I want to visualize my knowledge graph so that I can understand relationships between entities.
+    - V0.7 Integrate React Flow
+    - V0.7 Implement graph data transformation
+    - V0.7 Create node and edge rendering
+    - V0.7 Add zooming and panning controls
+    - V1 Implement detail level changes based on zoom
+  - V0.7 Story 2: As a user, I want to directly manipulate the graph by adding, moving, and connecting entities so that I can build my knowledge structure visually.
+    - V0.7 Implement entity creation in graph
+    - V0.7 Add grid-snapping for entity positioning
+    - V0.7 Create relationship drawing functionality
+    - V0.7 Implement selection and multi-selection
+    - V1 Add context menus for common operations
+  - V0.7 Story 3: As a user, I want to edit entity and relationship properties directly in the graph so that I can quickly update information.
+    - V0.7 Implement in-graph label editing
+    - V0.7 Create in-graph description editing
+    - V0.7 Add visual indicators for editing state
+    - V0.7 Implement validation for in-graph edits
+    - V1 Create undo/redo functionality for graph edits
+  - V1 Story 4: As a user, I want to use auto-layout functionality so that I can automatically organize my graph for better readability.
+    - V1 Implement multiple auto-layout algorithms
+    - V1 Create layout customization options
+    - V1 Add animation for layout transitions
+    - V2 Implement partial layout for selected nodes
+    - V1 Create layout presets for common patterns
+
+- **V0.7 Epic 6: Bidirectional Synchronization & Property Editing**
+  - Goal: Implement seamless synchronization between wiki content and graph visualization with comprehensive property editing.
+  - V0.7 Story 1: As a user, I want changes in wiki content to automatically update the graph so that both views remain consistent.
+    - V0.7 Implement wiki content change detection
+    - V0.7 Create entity extraction from wiki content
+    - V1 Add relationship inference from content
+    - V0.7 Implement graph update mechanism
+    - V0.7 Create visual indicators for wiki-sourced graph elements
+  - V0.7 Story 2: As a user, I want to edit entity and relationship properties through a side panel so that I can manage detailed information.
+    - V0.7 Create side panel property editor UI
+    - V0.7 Implement form generation from schema
+    - V0.7 Add validation based on schema rules
+    - V1 Create property change history
+    - V1 Implement property templates for common patterns
+  - V2 Story 3: As a user, I want to attach and process documents to entities and relationships so that I can extract additional knowledge.
+    - V0.7 Implement document upload in entity/relationship context
+    - V2 Create document processing pipeline
+    - V2 Add entity and relationship extraction from documents
+    - V2 Implement suggestion review interface
+    - V2 Create document reference management
+
+- **V1 Epic 7: AI Assistance & Knowledge Quality**
+  - Goal: Integrate AI capabilities to enhance knowledge creation and maintain knowledge quality.
+  - V1 Story 1: As a user, I want AI-suggested relationships between entities so that I can discover connections I might have missed.
+    - V1 Implement relationship suggestion algorithms
+    - V1 Create LLM integration for relationship inference
+    - V1 Add suggestion visualization (dotted lines)
+    - V1 Implement accept/reject controls
+    - V1 Create suggestion quality feedback mechanism
+  - V1 Story 2: As a user, I want AI-generated summaries and descriptions so that I can quickly add content.
+    - V1 Implement summary generation with LLMs
+    - V1 Create description generation for entities and relationships
+    - V1 Add context-aware suggestion capabilities
+    - V1 Implement suggestion review interface
+    - V1 Create suggestion customization options
+  - V0.7 Story 3: As a user, I want a to-do list of incomplete entities and relationships so that I can systematically improve knowledge quality.
+    - V0.7 Create to-do list generation based on schema completeness
+    - V0.7 Implement to-do list UI
+    - V1 Add filtering and sorting options
+    - V1 Create to-do item prioritization
+    - V1 Implement to-do completion tracking
+
+- **V1 Epic 8: Real-time Collaboration**
+  - Goal: Enable multiple users to work simultaneously on the same knowledge base with awareness of each other's actions.
+  - V1 Story 1: As a user, I want to see other users' presence and actions in real-time so that I can collaborate effectively.
+    - V1 Implement user presence indicators
+    - V1 Create cursor position sharing
+    - V1 Add selection sharing
+    - V1 Implement activity feed
+    - V1 Create notification system for important changes
+  - V1 Story 2: As a user, I want to collaborate on wiki editing in real-time so that multiple people can work on the same content.
+    - V1 Implement operational transformation for text editing
+    - V2 Create conflict resolution mechanisms
+    - V2 Add edit attribution
+    - V2 Implement edit locking for conflict prevention
+    - V1 Create collaborative editing indicators
+  - V1 Story 3: As a user, I want to collaborate on graph editing in real-time so that multiple people can work on the same knowledge structure.
+    - V1 Implement real-time graph update propagation
+    - V2 Create conflict resolution for graph operations
+    - V1 Add visual indicators for others' graph actions
+    - V1 Implement temporary state visualization
+    - V2 Create undo/redo with multi-user awareness
+
+- **V1 Epic 9: Publishing & Sharing**
+  - Goal: Enable users to publish and share their knowledge bases with controlled access.
+  - V1 Story 1: As a user, I want to publish my knowledge base as interactive web content so that others can explore it.
+    - V0.7 Create publishing configuration UI
+    - V1 Implement public website publishing (completed entities only)
+    - V1 Add basic customization options for published view
+    - V1 Create permalink generation
+    - V3 Implement analytics for published content
+  - V3 Story 2: As a user, I want to control access to my published knowledge base so that I can share it with specific audiences.
+    - V3 Implement access control for published content
+    - V3 Create invitation system for private access
+    - V3 Add password protection option
+    - V3 Implement expiring access links
+    - V3 Create access audit logging
+
+- **V2 Epic 10: System Administration & Monitoring**
+  - Goal: Provide tools for system administration, monitoring, and maintenance.
+  - V1 Story 1: As an administrator, I want to monitor system performance and usage so that I can ensure optimal operation.
+    - V1 Implement performance metrics collection
+    - V2 Create admin dashboard
+    - V2 Add usage statistics visualization
+    - V1 Implement alerting for performance issues
+    - V1 Create resource utilization tracking
+  - V2 Story 2: As an administrator, I want to manage user accounts and teams so that I can maintain system security and organization.
+    - V2 Create user management interface
+    - V2 Implement account actions (suspend, delete, reset)
+    - V2 Add team management capabilities
+    - V2 Create audit logging for admin actions
+    - V2 Implement bulk operations for user management
+
+- **V1 Epic 11: Commenting and Discussion**
+  - Goal: Implement a commenting and discussion system to enable collaborative knowledge refinement.
+  - V1 Story 1: As a user, I want to add comments to entities and relationships so that I can provide additional context or ask questions.
+    - V1 Create comment creation UI
+    - V1 Implement comment storage and retrieval
+    - V1 Add comment formatting options
+    - V2 Create comment notification system
+    - V1 Implement comment visibility controls
+  - V1 Story 2: As a user, I want to participate in threaded discussions so that I can engage in detailed conversations about specific knowledge elements.
+    - V1 Implement threaded reply structure
+    - V1 Create discussion view UI
+    - V1 Add sorting and filtering options
+    - V1 Implement discussion activity tracking
+    - V1 Create discussion summary view
+  - V1 Story 3: As a user, I want to mention other users in comments so that I can bring specific points to their attention.
+    - V1 Implement @mention functionality
+    - V1 Create user suggestion dropdown
+    - V2 Add notification system for mentions
+    - V2 Implement email notifications for mentions
+    - V1 Create mention highlighting in comments

@@ -21,3 +21,7 @@ devLoadAlwaysFiles:
 devDebugLog: .ai/debug-log.md
 devStoryLocation: docs/stories
 slashPrefix: BMad
+github:
+  repository: "HAN-AIM-CMD-WG/k-baas-2"
+  projectBoard: 9
+  syncOn: "manual"

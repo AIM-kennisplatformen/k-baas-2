@@ -44,18 +44,18 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 
 **Epic Goal:** Establish the foundational infrastructure, repository setup, and core application framework to enable efficient development of subsequent features.
 
-### Story 1.1: Monorepo Setup with Nx
-**As a developer, I want a properly configured monorepo with Nx that includes both frontend and backend projects so that I can efficiently develop and test the application.**
+### Story 1.1: Repository Setup
+**As a developer, I want a properly configured repository with both frontend and backend projects so that I can efficiently develop and test the application.**
 
 #### Acceptance Criteria:
-- Nx workspace is configured with appropriate project structure
+- Repository is organized with appropriate project structure
 - JavaScript is configured for frontend development
 - Python is configured for backend development
 - Linting and formatting rules are established and working
 - Basic CI/CD with GitHub Actions is functional
 
 #### Deliverables:
-- Configured Nx workspace
+- Configured repository structure
 - Frontend project structure (React 19 + JavaScript)
 - Backend project structure (Python 3.14 + FastAPI)
 - CI/CD pipeline configuration

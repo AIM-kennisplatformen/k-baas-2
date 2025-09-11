@@ -284,8 +284,8 @@ The Knowledge Graph Wiki Tool should provide a clean, intuitive, and visually ap
 
 ### Development & Deployment
 
-- **Repository & Service Architecture**: Monorepo structure containing both frontend and backend components
-- **Monorepo Tool**: Nx (recommended for its simplicity and good support for mixed JavaScript/Python projects)
+- **Repository & Service Architecture**: Single repository structure containing both frontend and backend components
+- **Project Organization**: Standard directory structure without monorepo management tools
 - **Build System**: Modern build pipeline with optimization for production deployment
 - **Containerization**: Docker-based containerization for consistent deployment
 - **Environment Configuration**: Environment variable-based configuration for different deployment scenarios
@@ -318,8 +318,8 @@ The Knowledge Graph Wiki Tool should provide a clean, intuitive, and visually ap
 
 - **V0.7 Epic 1: Project Foundation & Infrastructure**
   - Goal: Establish the foundational infrastructure, repository setup, and core application framework to enable efficient development of subsequent features.
-  - V0.7 Story 1: As a developer, I want a properly configured monorepo with Nx that includes both frontend and backend projects so that I can efficiently develop and test the application.
-    - V0.7 Set up Nx workspace with appropriate project structure
+  - V0.7 Story 1: As a developer, I want a properly configured repository with both frontend and backend projects so that I can efficiently develop and test the application.
+    - V0.7 Set up repository with appropriate project structure
     - V0.7 Configure JavaScript for frontend
     - V0.7 Configure Python for backend
     - V0.7 Set up linting and formatting rules
@@ -635,7 +635,7 @@ The following features and capabilities are explicitly out of scope for the MVP 
 
 ```
 /
-├── nx.json                      # Nx configuration
+├── README.md                    # Project documentation
 ├── package.json                 # Root package.json for JavaScript dependencies
 ├── requirements.txt             # Python dependencies
 ├── docker-compose.yml           # Local development environment
@@ -643,8 +643,7 @@ The following features and capabilities are explicitly out of scope for the MVP 
 │   └── workflows/
 │       ├── ci.yml               # CI workflow
 │       └── deploy.yml           # Deployment workflow
-├── apps/                        # Application code
-│   ├── frontend/                # React frontend application
+├── frontend/                    # React frontend application
 │   │   ├── public/              # Static assets
 │   │   ├── src/                 # Source code
 │   │   │   ├── components/      # Reusable UI components
@@ -654,8 +653,8 @@ The following features and capabilities are explicitly out of scope for the MVP 
 │   │   │   ├── utils/           # Utility functions
 │   │   │   ├── services/        # API and service integrations
 │   │   │   └── App.js           # Main application component
-│   │   └── package.json         # Frontend dependencies
-│   └── backend/                 # FastAPI backend application
+│   └── package.json             # Frontend dependencies
+├── backend/                     # FastAPI backend application
 │       ├── app/                 # Application code
 │       │   ├── api/             # API endpoints
 │       │   ├── core/            # Core functionality
@@ -664,22 +663,16 @@ The following features and capabilities are explicitly out of scope for the MVP 
 │       │   ├── schemas/         # Pydantic schemas
 │       │   └── services/        # Business logic services
 │       ├── tests/               # Backend tests
-│       └── main.py              # Application entry point
-├── libs/                        # Shared libraries
-│   ├── shared-ui/               # Shared UI components
-│   │   └── src/                 # Source code
-│   └── api-client/              # API client library
-│       └── src/                 # Source code
-└── tools/                       # Development and build tools
-    └── scripts/                 # Utility scripts
+│   └── main.py                  # Application entry point
+└── scripts/                     # Development and build tools
 ```
 
-- **Monorepo/Polyrepo:** Monorepo structure using Nx for managing the frontend and backend applications in a single repository. This approach simplifies development, testing, and deployment while maintaining clear separation of concerns.
+- **Repository Structure:** Single repository containing both frontend and backend applications with standard directory organization. This approach simplifies development, testing, and deployment while maintaining clear separation of concerns.
 
 - **Key Modules/Components and Responsibilities:**
   - **Frontend Application:** Responsible for the user interface, including the wiki editor, graph visualization, and user interactions.
   - **Backend API:** Provides data access, authentication, and business logic services to the frontend.
-  - **Shared Libraries:** Contains code shared between frontend and backend, such as data models and validation logic.
+  - **Shared Code:** Common utilities and configurations shared between frontend and backend where appropriate.
   - **TypeDB Integration:** Manages the connection to TypeDB and provides data access methods.
   - **Real-time Collaboration:** Handles WebSocket connections and real-time updates between users.
   - **Document Processing:** Manages document uploads and knowledge extraction.
@@ -744,7 +737,7 @@ Based on our discussions and requirements analysis for the Knowledge Graph Wiki 
 
 ### Technical Infrastructure
 
-- **Repository & Service Architecture Decision:** Monorepo structure using Nx for managing the frontend and backend applications in a single repository.
+- **Repository & Service Architecture Decision:** Single repository structure containing both frontend and backend applications without monorepo management tools.
 - **Starter Project/Template:** None specified; the project will be built from scratch following the defined structure.
 - **Hosting/Cloud Provider:** To be determined, but the application will be containerized for deployment flexibility.
 - **Frontend Platform:** React 19 with JavaScript, Tailwind 4, Shadcn/ui, Lexical for text editing, and React Flow for graph visualization.
@@ -868,7 +861,7 @@ The following features and capabilities are explicitly out of scope for the MVP 
 
 ```
 /
-├── nx.json                      # Nx configuration
+├── README.md                    # Project documentation
 ├── package.json                 # Root package.json for JavaScript dependencies
 ├── requirements.txt             # Python dependencies
 ├── docker-compose.yml           # Local development environment
@@ -876,8 +869,7 @@ The following features and capabilities are explicitly out of scope for the MVP 
 │   └── workflows/
 │       ├── ci.yml               # CI workflow
 │       └── deploy.yml           # Deployment workflow
-├── apps/                        # Application code
-│   ├── frontend/                # React frontend application
+├── frontend/                    # React frontend application
 │   │   ├── public/              # Static assets
 │   │   ├── src/                 # Source code
 │   │   │   ├── components/      # Reusable UI components
@@ -887,8 +879,8 @@ The following features and capabilities are explicitly out of scope for the MVP 
 │   │   │   ├── utils/           # Utility functions
 │   │   │   ├── services/        # API and service integrations
 │   │   │   └── App.js           # Main application component
-│   │   └── package.json         # Frontend dependencies
-│   └── backend/                 # FastAPI backend application
+│   └── package.json             # Frontend dependencies
+├── backend/                     # FastAPI backend application
 │       ├── app/                 # Application code
 │       │   ├── api/             # API endpoints
 │       │   ├── core/            # Core functionality
@@ -897,22 +889,16 @@ The following features and capabilities are explicitly out of scope for the MVP 
 │       │   ├── schemas/         # Pydantic schemas
 │       │   └── services/        # Business logic services
 │       ├── tests/               # Backend tests
-│       └── main.py              # Application entry point
-├── libs/                        # Shared libraries
-│   ├── shared-ui/               # Shared UI components
-│   │   └── src/                 # Source code
-│   └── api-client/              # API client library
-│       └── src/                 # Source code
-└── tools/                       # Development and build tools
-    └── scripts/                 # Utility scripts
+│   └── main.py                  # Application entry point
+└── scripts/                     # Development and build tools
 ```
 
-- **Monorepo/Polyrepo:** Monorepo structure using Nx for managing the frontend and backend applications in a single repository. This approach simplifies development, testing, and deployment while maintaining clear separation of concerns.
+- **Repository Structure:** Single repository containing both frontend and backend applications with standard directory organization. This approach simplifies development, testing, and deployment while maintaining clear separation of concerns.
 
 - **Key Modules/Components and Responsibilities:**
   - **Frontend Application:** Responsible for the user interface, including the wiki editor, graph visualization, and user interactions.
   - **Backend API:** Provides data access, authentication, and business logic services to the frontend.
-  - **Shared Libraries:** Contains code shared between frontend and backend, such as data models and validation logic.
+  - **Shared Code:** Common utilities and configurations shared between frontend and backend where appropriate.
   - **TypeDB Integration:** Manages the connection to TypeDB and provides data access methods.
   - **Real-time Collaboration:** Handles WebSocket connections and real-time updates between users.
   - **Document Processing:** Manages document uploads and knowledge extraction.
@@ -977,7 +963,7 @@ Based on our discussions and requirements analysis for the Knowledge Graph Wiki 
 
 ### Technical Infrastructure
 
-- **Repository & Service Architecture Decision:** Monorepo structure using Nx for managing the frontend and backend applications in a single repository.
+- **Repository & Service Architecture Decision:** Single repository structure containing both frontend and backend applications without monorepo management tools.
 - **Starter Project/Template:** None specified; the project will be built from scratch following the defined structure.
 - **Hosting/Cloud Provider:** To be determined, but the application will be containerized for deployment flexibility.
 - **Frontend Platform:** React 19 with JavaScript, Tailwind 4, Shadcn/ui, Lexical for text editing, and React Flow for graph visualization.

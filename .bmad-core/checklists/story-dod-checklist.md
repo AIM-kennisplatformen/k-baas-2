@@ -79,6 +79,12 @@ The goal is quality delivery, not just checking boxes.]]
    - [ ] User-facing documentation updated, if changes impact users.
    - [ ] Technical documentation (e.g., READMEs, system diagrams) updated if significant architectural changes were made.
 
+8. **GitHub Integration:**
+
+   [[LLM: Verify sync with GitHub Issues]]
+   - [ ] Story status is correctly reflected in the corresponding GitHub Issue.
+   - [ ] All relevant labels and assignees are synced from the GitHub Issue.
+
 ## Final Confirmation
 
 [[LLM: FINAL DOD SUMMARY

@@ -108,6 +108,7 @@ ALWAYS cite source documents: `[Source: architecture/{filename}.md#{section}]`
 - Provide summary to user including:
   - Story created: `{devStoryLocation}/{epicNum}.{storyNum}.story.md`
   - Status: Draft
+  - Next step: Run `github-sync.md` to create GitHub Issue
   - Key technical components included from architecture docs
   - Any deviations or conflicts noted between epic and architecture
   - Checklist Results
