@@ -1,0 +1,224 @@
+# <!-- Powered by BMAD™ Core -->
+workflow:
+  id: brownfield-ui
+  name: Brownfield UI/Frontend Enhancement
+  description: >-
+    Agent workflow for enhancing existing frontend applications with new features,
+    modernization, or design improvements. Handles existing UI analysis and safe integration.
+  type: brownfield
+  project_types:
+    - ui-modernization
+    - framework-migration
+    - design-refresh
+    - frontend-enhancement
+
+  sequence:
+    - step: ui_analysis
+      agent: architect
+      action: analyze existing project and use task document-project
+      creates: multiple documents per the document-project template
+      notes: "Review existing frontend application, user feedback, analytics data, and identify improvement areas."
+
+    - agent: pm
+      creates: prd.md
+      uses: brownfield-prd-tmpl
+      requires: existing_ui_analysis
+      notes: "Creates comprehensive PRD focused on UI enhancement with existing system analysis. SAVE OUTPUT: Copy final prd.md to your project's docs/ folder."
+
+    - agent: ux-expert
+      creates: front-end-spec.md
+      uses: front-end-spec-tmpl
+      requires: prd.md
+      notes: "Creates UI/UX specification that integrates with existing design patterns. SAVE OUTPUT: Copy final front-end-spec.md to your project's docs/ folder."
+
+    - agent: architect
+      creates: architecture.md
+      uses: brownfield-architecture-tmpl
+      requires:
+        - prd.md
+        - front-end-spec.md
+      notes: "Creates frontend architecture with component integration strategy and migration planning. SAVE OUTPUT: Copy final architecture.md to your project's docs/ folder."
+
+    - agent: po
+      validates: all_artifacts
+      uses: po-master-checklist
+      notes: "Validates all documents for UI integration safety and design consistency. May require updates to any document."
+
+    - agent: various
+      updates: any_flagged_documents
+      condition: po_checklist_issues
+      notes: "If PO finds issues, return to relevant agent to fix and re-export updated documents to docs/ folder."
+
+    - agent: po
+      action: shard_documents
+      creates: sharded_docs
+      requires: all_artifacts_in_project
+      notes: |
+        Shard documents for IDE development:
+        - Option A: Use PO agent to shard: @po then ask to shard docs/prd.md
+        - Option B: Manual: Drag shard-doc task + docs/prd.md into chat
+        - Creates docs/prd/ and docs/architecture/ folders with sharded content
+
+    - step: github_setup
+      action: configure_github_integration
+      requires: sharded_docs
+      notes: |
+        GitHub Integration Setup:
+        - Ensure core-config.yaml has github.repo configured
+        - Verify gh CLI is authenticated (run 'gh auth status')
+        - Create project board if it doesn't exist using scripts/github/ensure-project-board.sh
+        - Create epic issues from PRD using scripts/github/create-epic-issue.sh for each epic
+
+    - agent: sm
+      action: create_story
+      creates: story_issue
+      requires: github_setup
+      repeats: for_each_epic
+      notes: |
+        Story creation cycle:
+        - SM Agent (New Chat): @sm → *create (or use create-next-story task)
+        - Creates next story issue from sharded docs using scripts/github/create-story-issue.sh
+        - Story issue starts with "draft" label in "Backlog" column
+        - Creates task sub-issues using scripts/github/create-task-issue.sh
+        - Returns story issue number for tracking
+
+    - agent: analyst/pm
+      action: review_draft_story
+      updates: story_issue
+      requires: story_issue
+      optional: true
+      condition: user_wants_story_review
+      notes: |
+        OPTIONAL: Review and approve draft story issue
+        - Use validate-next-story task with issue number
+        - Review story issue completeness and alignment using checklists/story-draft-checklist.md
+        - Add validation comment to issue
+        - Update issue status: Draft → Ready using scripts/github/update-issue-status.sh {issue_number} "Ready"
+        - Add "validated" label to issue
+
+    - agent: dev
+      action: implement_story
+      creates: implementation_files
+      requires: story_issue
+      notes: |
+        Dev Agent (New Chat): @dev
+        - Uses story issue number to get requirements: gh issue view {issue_number}
+        - Implements story and completes task sub-issues
+        - Updates File List in issue comments
+        - Completes DoD checklist (checklists/story-dod-checklist.md) and adds as comment
+        - Updates issue status to "Review" using scripts/github/update-issue-status.sh {issue_number} "Review"
+        - Closes completed task sub-issues
+
+    - agent: qa
+      action: review_implementation
+      updates: implementation_files
+      requires: implementation_files
+      optional: true
+      notes: |
+        OPTIONAL: QA Agent (New Chat): @qa → review-story {issue_number}
+        - Senior dev review with refactoring ability using tasks/review-story.md
+        - Fixes small issues directly
+        - Adds QA results as issue comment
+        - Updates issue labels and status based on review
+        - If approved: scripts/github/update-issue-status.sh {issue_number} "Done"
+        - If changes needed: keeps in "Review" status with feedback
+
+    - agent: dev
+      action: address_qa_feedback
+      updates: implementation_files
+      condition: qa_left_unchecked_items
+      notes: |
+        If QA left feedback requiring changes:
+        - Dev Agent (New Chat): Address QA feedback items from issue comments
+        - Update implementation based on QA checklist
+        - Return to QA for final approval by commenting on issue
+
+    - step: repeat_development_cycle
+      action: continue_for_all_stories
+      notes: |
+        Repeat story cycle (SM → Dev → QA) for all epic story issues
+        Use scripts/github/list-stories.sh to check for next open stories
+        Continue until all story issues in epic are completed (moved to "Done" column)
+        Monitor progress via GitHub project board
+
+    - agent: po
+      action: epic_retrospective
+      creates: epic-retrospective.md
+      condition: epic_complete
+      optional: true
+      notes: |
+        OPTIONAL: After epic completion
+        - NOTE: epic-retrospective task coming soon
+        - Validate epic was completed correctly
+        - Document learnings and improvements
+
+    - step: workflow_end
+      action: project_complete
+      notes: |
+        All stories implemented and reviewed!
+        Project development phase complete.
+
+        Reference: {root}/data/bmad-kb.md#IDE Development Workflow
+
+  flow_diagram: |
+    ```mermaid
+    graph TD
+        A[Start: UI Enhancement] --> B[analyst: analyze existing UI]
+        B --> C[pm: prd.md]
+        C --> D[ux-expert: front-end-spec.md]
+        D --> E[architect: architecture.md]
+        E --> F[po: validate with po-master-checklist]
+        F --> G{PO finds issues?}
+        G -->|Yes| H[Return to relevant agent for fixes]
+        G -->|No| I[po: shard documents]
+        H --> F
+        
+        I --> I1[Setup GitHub Integration]
+        I1 --> I2[Create Epic Issues]
+        I2 --> J[sm: create story issue]
+        J --> K{Review draft story?}
+        K -->|Yes| L[analyst/pm: validate story issue]
+        K -->|No| M[dev: implement story issue]
+        L --> M
+        M --> N{QA review?}
+        N -->|Yes| O[qa: review via issue]
+        N -->|No| P{More story issues?}
+        O --> Q{QA found issues?}
+        Q -->|Yes| R[dev: address via issue comments]
+        Q -->|No| P
+        R --> O
+        P -->|Yes| J
+        P -->|No| S{Epic retrospective?}
+        S -->|Yes| T[po: epic retrospective]
+        S -->|No| U[Project Complete]
+        T --> U
+
+        style U fill:#90EE90
+        style I fill:#ADD8E6
+        style J fill:#ADD8E6
+        style M fill:#ADD8E6
+        style C fill:#FFE4B5
+        style D fill:#FFE4B5
+        style E fill:#FFE4B5
+        style L fill:#F0E68C
+        style O fill:#F0E68C
+        style T fill:#F0E68C
+    ```
+
+  decision_guidance:
+    when_to_use:
+      - UI enhancement requires coordinated stories
+      - Design system changes needed
+      - New component patterns required
+      - User research and testing needed
+      - Multiple team members will work on related changes
+
+  handoff_prompts:
+    analyst_to_pm: "UI analysis complete. Create comprehensive PRD with UI integration strategy."
+    pm_to_ux: "PRD ready. Save it as docs/prd.md, then create the UI/UX specification."
+    ux_to_architect: "UI/UX spec complete. Save it as docs/front-end-spec.md, then create the frontend architecture."
+    architect_to_po: "Architecture complete. Save it as docs/architecture.md. Please validate all artifacts for UI integration safety."
+    po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
+    setup_github: "All planning artifacts validated. Configure GitHub integration: 1) Set github.repo in core-config.yaml 2) Authenticate gh CLI 3) Run scripts/github/ensure-project-board.sh 4) Create epic issues from PRD"
+    story_creation: "GitHub integration ready. Use create-next-story task or scripts/github/create-story-issue.sh to create story issues. Track progress on GitHub project board."
+    complete: "All planning artifacts validated and GitHub integration configured. Begin development cycle with story issue creation."
