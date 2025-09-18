@@ -1,4 +1,4 @@
-# Knowledge Graph Wiki Tool Product Requirements Document (PRD)
+# Knowledge Graph Wiki Tool Product Requirements Document (PRD).
 
 ## Goal, Objective and Context
 
