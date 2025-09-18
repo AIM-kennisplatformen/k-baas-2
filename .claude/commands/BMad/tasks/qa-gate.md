@@ -1,7 +1,3 @@
-# /qa-gate Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # qa-gate
@@ -20,7 +16,7 @@ Generate a standalone quality gate file that provides a clear pass/fail decision
 
 ## Gate File Location
 
-**ALWAYS** check the `bmad-core/core-config.yaml` for the `qa.qaLocation/gates`
+**ALWAYS** check the `.bmad-core/core-config.yaml` for the `qa.qaLocation/gates`
 
 Slug rules:
 
@@ -130,32 +126,43 @@ waiver:
 
 ## Output Requirements
 
-1. **ALWAYS** create gate file at: `qa.qaLocation/gates` from `bmad-core/core-config.yaml`
-2. **ALWAYS** append this exact format to story's QA Results section:
+1. **ALWAYS** create gate file at: `qa.qaLocation/gates` from `.bmad-core/core-config.yaml`
+2. **ALWAYS** add QA gate comment to story issue using this exact format:
 
-   ```text
-   Gate: {STATUS} → qa.qaLocation/gates/{epic}.{story}-{slug}.yml
+   ```bash
+   gh issue comment {issue_number} --body "## QA Gate Status
+
+   **Gate Decision**: {STATUS}
+   **Gate File**: qa.qaLocation/gates/{epic}.{story}-{slug}.yml
+   **Reviewer**: Quinn (Test Architect)
+   **Date**: {date}
+
+   {detailed findings and recommendations}"
    ```
 
 3. Keep status_reason to 1-2 sentences maximum
 4. Use severity values exactly: `low`, `medium`, or `high`
 
-## Example Story Update
+## Example Issue Comment
 
-After creating gate file, append to story's QA Results section:
+After creating gate file, add comment to story issue:
 
 ```markdown
-## QA Results
+## QA Gate Status
 
-### Review Date: 2025-01-12
+**Gate Decision**: CONCERNS
+**Gate File**: docs/qa/gates/1.3-user-auth.yml
+**Reviewer**: Quinn (Test Architect)
+**Date**: 2025-01-12
 
-### Reviewed By: Quinn (Test Architect)
+### Key Findings
+- Security: Rate limiting missing on auth endpoints
+- Performance: Response times within acceptable range
+- Testing: Integration test coverage needs improvement
 
-[... existing review content ...]
-
-### Gate Status
-
-Gate: CONCERNS → qa.qaLocation/gates/{epic}.{story}-{slug}.yml
+### Recommendations
+- Add rate limiting middleware before production
+- Implement additional integration tests for auth flow
 ```
 
 ## Key Principles

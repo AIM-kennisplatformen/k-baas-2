@@ -1,7 +1,3 @@
-# /risk-profile Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # risk-profile
@@ -12,10 +8,12 @@ Generate a comprehensive risk assessment matrix for a story implementation using
 
 ```yaml
 required:
-  - story_id: '{epic}.{story}' # e.g., "1.3"
-  - story_path: 'docs/stories/{epic}.{story}.*.md'
-  - story_title: '{title}' # If missing, derive from story file H1
+  - story_issue_number: GitHub issue number for the story (e.g., 42)
+  - story_title: '{title}' # If missing, derive from issue title
   - story_slug: '{slug}' # If missing, derive from title (lowercase, hyphenated)
+
+optional:
+  - github_repo: from `.bmad-core/core-config.yaml` key `github.repo`
 ```
 
 ## Purpose
@@ -341,12 +339,18 @@ Based on risk profile, recommend:
 - Else → Gate = PASS
 - Unmitigated risks → Document in gate
 
-### Output 3: Story Hook Line
+### Output 3: Issue Comment Line
 
-**Print this line for review task to quote:**
+**Add comment to story issue using:**
 
-```text
-Risk profile: qa.qaLocation/assessments/{epic}.{story}-risk-{YYYYMMDD}.md
+```bash
+gh issue comment {story_issue_number} --body "## Risk Assessment Complete
+
+**Risk Profile**: qa.qaLocation/assessments/{epic}.{story}-risk-{YYYYMMDD}.md
+**Overall Risk Score**: {score}/100
+**Critical Risks**: {count}
+
+{summary of key findings}"
 ```
 
 ## Key Principles

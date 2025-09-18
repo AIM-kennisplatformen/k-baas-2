@@ -1,7 +1,3 @@
-# /brownfield-create-story Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # Create Brownfield Story Task
@@ -51,9 +47,9 @@ Gather minimal but essential context about the existing project:
 - [ ] Impact boundaries identified
 - [ ] Success criteria established
 
-### 2. Story Creation
+### 2. Story Creation and GitHub Issue Creation
 
-Create a single focused story following this structure:
+**Prepare Story Content:** Create a single focused story following this structure:
 
 #### Story Title
 
@@ -82,9 +78,15 @@ So that {{clear benefit/value}}.
 2. {{Secondary functional requirement (if any)}}
 3. {{Integration requirement}}
 
-**Integration Requirements:** 4. Existing {{relevant functionality}} continues to work unchanged 5. New functionality follows existing {{pattern}} pattern 6. Integration with {{system/component}} maintains current behavior
+**Integration Requirements:**
+4. Existing {{relevant functionality}} continues to work unchanged
+5. New functionality follows existing {{pattern}} pattern
+6. Integration with {{system/component}} maintains current behavior
 
-**Quality Requirements:** 7. Change is covered by appropriate tests 8. Documentation is updated if needed 9. No regression in existing functionality verified
+**Quality Requirements:**
+7. Change is covered by appropriate tests
+8. Documentation is updated if needed
+9. No regression in existing functionality verified
 
 #### Technical Notes
 
@@ -100,6 +102,20 @@ So that {{clear benefit/value}}.
 - [ ] Code follows existing patterns and standards
 - [ ] Tests pass (existing and new)
 - [ ] Documentation updated if applicable
+
+**Create Story Issue:** After preparing the content above, execute:
+
+If this is a standalone story (no epic):
+`scripts/github/create-story-issue.sh 1 "{{Specific Enhancement}} - Brownfield Addition" "{{full_story_content}}" ""`
+
+OR if this belongs to an existing epic:
+`scripts/github/create-story-issue.sh {epic_num} "Story {epic_num}.{story_num}: {{Specific Enhancement}}" "{{full_story_content}}" {epic_issue_number}`
+
+This will:
+- Create GitHub issue with story label
+- Add to project board in Backlog column
+- Link to parent epic if applicable
+- Return story issue number for tracking
 
 ### 3. Risk and Compatibility Check
 
@@ -143,6 +159,8 @@ The story creation is successful when:
 3. Existing system patterns are identified and will be followed
 4. Rollback plan is simple and feasible
 5. Acceptance criteria include existing functionality verification
+6. Story issue is created and added to project board
+7. Story issue number is available for development tracking
 
 ## Important Notes
 
@@ -151,3 +169,5 @@ The story creation is successful when:
 - Always prioritize existing system integrity
 - When in doubt about integration complexity, use brownfield-create-epic instead
 - Stories should take no more than 4 hours of focused development work
+- Story will be tracked as GitHub issue with labels and project board management
+- Use `scripts/github/list-stories.sh` to check existing stories before creating new ones

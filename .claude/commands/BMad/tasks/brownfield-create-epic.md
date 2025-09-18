@@ -1,7 +1,3 @@
-# /brownfield-create-epic Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # Create Brownfield Epic Task
@@ -49,7 +45,7 @@ Before creating the epic, gather essential information about the existing projec
 
 ### 2. Epic Creation
 
-Create a focused epic following this structure:
+**Prepare Epic Content:** Create a focused epic following this structure:
 
 #### Epic Title
 
@@ -80,6 +76,14 @@ List 1-3 focused stories that complete the epic:
 1. **Story 1:** {{Story title and brief description}}
 2. **Story 2:** {{Story title and brief description}}
 3. **Story 3:** {{Story title and brief description}}
+
+**Create Epic Issue:** After preparing the content above, execute:
+`scripts/github/create-epic-issue.sh "{{Enhancement Name}} - Brownfield Enhancement" "{{epic_description_with_all_sections}}"`
+
+This will:
+- Create GitHub issue with epic label and milestone
+- Add to project board in Backlog column
+- Return epic issue number for use in subsequent story creation
 
 #### Compatibility Requirements
 
@@ -129,7 +133,7 @@ Before finalizing the epic, ensure:
 
 ### 4. Handoff to Story Manager
 
-Once the epic is validated, provide this handoff to the Story Manager:
+Once the epic is validated and the epic issue is created, provide this handoff to the Story Manager:
 
 ---
 
@@ -137,11 +141,15 @@ Once the epic is validated, provide this handoff to the Story Manager:
 
 "Please develop detailed user stories for this brownfield epic. Key considerations:
 
+- Epic Issue: #{epic_issue_number} - {{Enhancement Name}} - Brownfield Enhancement
 - This is an enhancement to an existing system running {{technology stack}}
 - Integration points: {{list key integration points}}
 - Existing patterns to follow: {{relevant existing patterns}}
 - Critical compatibility requirements: {{key requirements}}
 - Each story must include verification that existing functionality remains intact
+
+Create story issues using the create-next-story task or manually with:
+`scripts/github/create-story-issue.sh {epic_num} "Story {epic_num}.{story_num}: {title}" "{story_body}" {epic_issue_number}`
 
 The epic should maintain system integrity while delivering {{epic goal}}."
 
@@ -157,6 +165,8 @@ The epic creation is successful when:
 4. Stories are logically sequenced for safe implementation
 5. Compatibility requirements are clearly specified
 6. Rollback plan is feasible and documented
+7. Epic issue is created and added to project board
+8. Epic issue number is available for story creation
 
 ## Important Notes
 

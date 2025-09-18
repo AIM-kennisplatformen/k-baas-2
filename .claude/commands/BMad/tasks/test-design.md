@@ -1,7 +1,3 @@
-# /test-design Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # test-design
@@ -12,10 +8,13 @@ Create comprehensive test scenarios with appropriate test level recommendations 
 
 ```yaml
 required:
-  - story_id: '{epic}.{story}' # e.g., "1.3"
-  - story_path: '{devStoryLocation}/{epic}.{story}.*.md' # Path from core-config.yaml
-  - story_title: '{title}' # If missing, derive from story file H1
+  - story_issue_number: GitHub issue number for the story (e.g., 42)
+  - story_title: '{title}' # If missing, derive from issue title
   - story_slug: '{slug}' # If missing, derive from title (lowercase, hyphenated)
+
+optional:
+  - github_repo: from `.bmad-core/core-config.yaml` key `github.repo`
+  - acceptance_criteria: From story issue body (use `gh issue view {issue_number} --json body`)
 ```
 
 ## Purpose
@@ -151,13 +150,19 @@ test_design:
   coverage_gaps: [] # List any ACs without tests
 ```
 
-### Output 3: Trace References
+### Output 3: Issue Comment
 
-Print for use by trace-requirements task:
+Add comment to story issue:
 
-```text
-Test design matrix: qa.qaLocation/assessments/{epic}.{story}-test-design-{YYYYMMDD}.md
-P0 tests identified: {count}
+```bash
+gh issue comment {story_issue_number} --body "## Test Design Complete
+
+**Test Design Matrix**: qa.qaLocation/assessments/{epic}.{story}-test-design-{YYYYMMDD}.md
+**Total Test Scenarios**: {total}
+**P0 Tests Identified**: {count}
+**Coverage Gaps**: {gap_count}
+
+{summary of test strategy and key gaps}"
 ```
 
 ## Quality Checklist

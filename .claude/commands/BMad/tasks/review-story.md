@@ -1,7 +1,3 @@
-# /review-story Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # review-story
@@ -13,16 +9,17 @@ Perform a comprehensive test architecture review with quality gate decision. Thi
 ```yaml
 required:
   - story_id: '{epic}.{story}' # e.g., "1.3"
-  - story_path: '{devStoryLocation}/{epic}.{story}.*.md' # Path from core-config.yaml
-  - story_title: '{title}' # If missing, derive from story file H1
+  - issue_number: '{story_issue_number}' # GitHub issue number for the story
+  - story_title: '{title}' # If missing, derive from issue title
   - story_slug: '{slug}' # If missing, derive from title (lowercase, hyphenated)
 ```
 
 ## Prerequisites
 
-- Story status must be "Review"
-- Developer has completed all tasks and updated the File List
+- Story issue must have "review" label or be in "Review" column on project board
+- Developer has completed all task sub-issues and updated issue comments with File List
 - All automated tests are passing
+- Use `gh issue view {issue_number}` to verify story details before starting review
 
 ## Review Process - Adaptive Test Architecture
 
@@ -110,17 +107,13 @@ required:
 - Add comments for complex logic if missing
 - Ensure any API changes are documented
 
-## Output 1: Update Story File - QA Results Section ONLY
+## Output 1: Add QA Results Comment to Story Issue
 
-**CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any other sections.
+**CRITICAL**: Add QA review results as a new comment to the story issue. DO NOT modify the original issue description.
 
-**QA Results Anchor Rule:**
+**Comment Format**: Use `gh issue comment {issue_number} --body "QA Results..."` to add review results.
 
-- If `## QA Results` doesn't exist, append it at end of file
-- If it exists, append a new dated entry below existing entries
-- Never edit other sections
-
-After review and any refactoring, append your results to the story file in the QA Results section:
+After review and any refactoring, add your results as a comment to the story issue in this format:
 
 ```markdown
 ## QA Results
@@ -183,6 +176,13 @@ NFR assessment: qa.qaLocation/assessments/{epic}.{story}-nfr-{YYYYMMDD}.md
 
 [✓ Ready for Done] / [✗ Changes Required - See unchecked items above]
 (Story owner decides final status)
+
+### Issue Status Update
+
+After review completion:
+- If Ready for Done: `scripts/github/update-issue-status.sh {issue_number} "Done"`
+- If Changes Required: Keep in "Review" status and assign back to developer
+- Add/update labels: "qa-complete", "ready" or "changes-required"
 ```
 
 ## Output 2: Create Quality Gate File
@@ -190,7 +190,7 @@ NFR assessment: qa.qaLocation/assessments/{epic}.{story}-nfr-{YYYYMMDD}.md
 **Template and Directory:**
 
 - Render from `../templates/qa-gate-tmpl.yaml`
-- Create directory defined in `qa.qaLocation/gates` (see `bmad-core/core-config.yaml`) if missing
+- Create directory defined in `qa.qaLocation/gates` (see `.bmad-core/core-config.yaml`) if missing
 - Save to: `qa.qaLocation/gates/{epic}.{story}-{slug}.yml`
 
 Gate file structure:
@@ -303,8 +303,8 @@ For each issue in `top_issues`, include a `suggested_owner`:
 
 Stop the review and request clarification if:
 
-- Story file is incomplete or missing critical sections
-- File List is empty or clearly incomplete
+- Story issue is incomplete or missing critical information in description or comments
+- File List (in issue comments) is empty or clearly incomplete
 - No tests exist when they were required
 - Code changes don't align with story requirements
 - Critical architectural issues that require discussion
@@ -313,8 +313,11 @@ Stop the review and request clarification if:
 
 After review:
 
-1. Update the QA Results section in the story file
+1. Add QA Results comment to the story issue using `gh issue comment {issue_number}`
 2. Create the gate file in directory from `qa.qaLocation/gates`
-3. Recommend status: "Ready for Done" or "Changes Required" (owner decides)
-4. If files were modified, list them in QA Results and ask Dev to update File List
-5. Always provide constructive feedback and actionable recommendations
+3. Update issue status and labels:
+   - If Ready for Done: `scripts/github/update-issue-status.sh {issue_number} "Done"` and add "qa-approved" label
+   - If Changes Required: Add "changes-required" label and assign back to developer
+4. Update project board column as appropriate
+5. If files were modified, list them in QA Results comment and ask Dev to update File List in issue comments
+6. Always provide constructive feedback and actionable recommendations

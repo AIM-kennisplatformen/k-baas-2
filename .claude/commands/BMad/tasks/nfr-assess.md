@@ -1,7 +1,3 @@
-# /nfr-assess Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # nfr-assess
@@ -12,13 +8,13 @@ Quick NFR validation focused on the core four: security, performance, reliabilit
 
 ```yaml
 required:
-  - story_id: '{epic}.{story}' # e.g., "1.3"
-  - story_path: `bmad-core/core-config.yaml` for the `devStoryLocation`
+  - story_issue_number: GitHub issue number for the story (e.g., 42)
+  - github_repo: from `.bmad-core/core-config.yaml` key `github.repo`
 
 optional:
-  - architecture_refs: `bmad-core/core-config.yaml` for the `architecture.architectureFile`
-  - technical_preferences: `bmad-core/core-config.yaml` for the `technicalPreferences`
-  - acceptance_criteria: From story file
+  - architecture_refs: `.bmad-core/core-config.yaml` for the `architecture.architectureFile`
+  - technical_preferences: `.bmad-core/core-config.yaml` for the `technicalPreferences`
+  - acceptance_criteria: From story issue body (use `gh issue view {issue_number} --json body`)
 ```
 
 ## Purpose
@@ -32,9 +28,9 @@ Assess non-functional requirements for a story and generate:
 
 ### 0. Fail-safe for Missing Inputs
 
-If story_path or story file can't be found:
+If story issue can't be found:
 
-- Still create assessment file with note: "Source story not found"
+- Still create assessment file with note: "Source story issue not found"
 - Set all selected NFRs to CONCERNS with notes: "Target unknown / evidence missing"
 - Continue with assessment to provide value
 

@@ -1,7 +1,3 @@
-# /trace-requirements Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # trace-requirements
@@ -251,12 +247,18 @@ This traceability feeds into quality gates:
 - Minor gaps → CONCERNS
 - Missing P0 tests from test-design → CONCERNS
 
-### Output 3: Story Hook Line
+### Output 3: Issue Comment
 
-**Print this line for review task to quote:**
+**Add comment to story issue:**
 
-```text
-Trace matrix: qa.qaLocation/assessments/{epic}.{story}-trace-{YYYYMMDD}.md
+```bash
+gh issue comment {story_issue_number} --body "## Requirements Traceability Complete
+
+**Trace Matrix**: qa.qaLocation/assessments/{epic}.{story}-trace-{YYYYMMDD}.md
+**Coverage Summary**: {full_count} fully covered, {partial_count} partially covered, {none_count} not covered
+**Critical Gaps**: {gap_count}
+
+{summary of coverage and key recommendations}"
 ```
 
 - Full coverage → PASS contribution

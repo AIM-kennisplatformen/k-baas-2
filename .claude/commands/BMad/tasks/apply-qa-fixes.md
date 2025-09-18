@@ -1,7 +1,3 @@
-# /apply-qa-fixes Task
-
-When this command is used, execute the following task:
-
 <!-- Powered by BMAD™ Core -->
 
 # apply-qa-fixes
@@ -19,12 +15,12 @@ Implement fixes based on QA results (gate and assessments) for a specific story.
 
 ```yaml
 required:
-  - story_id: '{epic}.{story}' # e.g., "2.2"
-  - qa_root: from `bmad-core/core-config.yaml` key `qa.qaLocation` (e.g., `docs/project/qa`)
-  - story_root: from `bmad-core/core-config.yaml` key `devStoryLocation` (e.g., `docs/project/stories`)
+  - story_issue_number: GitHub issue number for the story (e.g., 42)
+  - qa_root: from `.bmad-core/core-config.yaml` key `qa.qaLocation` (e.g., `docs/project/qa`)
+  - github_repo: from `.bmad-core/core-config.yaml` key `github.repo` (e.g., "username/project")
 
 optional:
-  - story_title: '{title}' # derive from story H1 if missing
+  - story_title: '{title}' # derive from issue title if missing
   - story_slug: '{slug}' # derive from title (lowercase, hyphenated) if missing
 ```
 
@@ -47,11 +43,13 @@ optional:
 
 ## Process (Do not skip steps)
 
-### 0) Load Core Config & Locate Story
+### 0) Load Core Config & Locate Story Issue
 
-- Read `bmad-core/core-config.yaml` and resolve `qa_root` and `story_root`
-- Locate story file in `{story_root}/{epic}.{story}.*.md`
-  - HALT if missing and ask for correct story id/path
+- Read `.bmad-core/core-config.yaml` and resolve `qa_root` and GitHub configuration
+- **Verify GitHub CLI**: Ensure `gh` CLI is authenticated and configured
+- **Locate story issue**: Use `gh issue view {story_issue_number} --json body,title,labels,milestone` to get story details
+  - HALT if missing and ask for correct story issue number
+- **Extract story ID**: Get epic.story format from issue milestone or labels for QA file naming
 
 ### 1) Collect QA Findings
 
@@ -93,31 +91,28 @@ Guidance:
 - Run `deno test -A` until all tests pass
 - Iterate until clean
 
-### 5) Update Story (Allowed Sections ONLY)
+### 5) Update Story Issue (Via Comments ONLY)
 
-CRITICAL: Dev agent is ONLY authorized to update these sections of the story file. Do not modify any other sections (e.g., QA Results, Story, Acceptance Criteria, Dev Notes, Testing):
+CRITICAL: Dev agent is ONLY authorized to add comments to the story issue. Do not modify issue body, title, or core metadata:
 
-- Tasks / Subtasks Checkboxes (mark any fix subtask you added as done)
-- Dev Agent Record →
-  - Agent Model Used (if changed)
-  - Debug Log References (commands/results, e.g., lint/tests)
-  - Completion Notes List (what changed, why, how)
-  - File List (all added/modified/deleted files)
-- Change Log (new dated entry describing applied fixes)
-- Status (see Rule below)
+**Add Progress Comment**: Use `gh issue comment {story_issue_number} --body "Dev Agent Progress Update..."` to document:
+- **Task Sub-Issues**: Close completed task sub-issues using `gh issue close {task_issue_number}`
+- **Debug Log References**: Commands/results (e.g., lint/tests) in comment
+- **Completion Notes**: What changed, why, how in comment
+- **File List**: All added/modified/deleted files documented in comment
+- **Change Log**: New dated entry describing applied fixes in comment
 
-Status Rule:
-
-- If gate was PASS and all identified gaps are closed → set `Status: Ready for Done`
-- Otherwise → set `Status: Ready for Review` and notify QA to re-run the review
+**Status Rule**:
+- If gate was PASS and all identified gaps are closed → Add 'ready-for-done' label and move to 'Done' column using `scripts/github/update-issue-status.sh {story_issue_number} "Done"`
+- Otherwise → Add 'ready-for-review' label and move to 'Review' column using `scripts/github/update-issue-status.sh {story_issue_number} "Review"` and notify QA to re-run the review
 
 ### 6) Do NOT Edit Gate Files
 
-- Dev does not modify gate YAML. If fixes address issues, request QA to re-run `review-story` to update the gate
+- Dev does not modify gate YAML. If fixes address issues, request QA to re-run `review-story` task to update the gate and add new QA comments to the story issue
 
 ## Blocking Conditions
 
-- Missing `bmad-core/core-config.yaml`
+- Missing `.bmad-core/core-config.yaml`
 - Story file not found for `story_id`
 - No QA artifacts found (neither gate nor assessments)
   - HALT and request QA to generate at least a gate file (or proceed only with clear developer-provided fix list)
@@ -129,10 +124,10 @@ Status Rule:
 - All high severity `top_issues` addressed
 - NFR FAIL → resolved; CONCERNS minimized or documented
 - Coverage gaps closed or explicitly documented with rationale
-- Story updated (allowed sections only) including File List and Change Log
-- Status set according to Status Rule
+- Story issue updated via comments including File List and Change Log
+- Issue status and labels updated according to Status Rule using GitHub scripts
 
-## Example: Story 2.2
+## Example: Story Issue #42
 
 Given gate `docs/project/qa/gates/2.2-*.yml` shows
 
@@ -143,12 +138,13 @@ Fix plan:
 
 - Add a test ensuring the Toolkit Menu "Back" action returns to Main Menu
 - Add a static test verifying imports for service/view go through `deps.ts`
-- Re-run lint/tests and update Dev Agent Record + File List accordingly
+- Re-run lint/tests and add progress comment to issue #42 with Dev Agent Record + File List
+- Close completed task sub-issues and update issue status via GitHub scripts
 
 ## Key Principles
 
 - Deterministic, risk-first prioritization
 - Minimal, maintainable changes
 - Tests validate behavior and close gaps
-- Strict adherence to allowed story update areas
-- Gate ownership remains with QA; Dev signals readiness via Status
+- Strict adherence to allowed story issue comment areas
+- Gate ownership remains with QA; Dev signals readiness via issue labels and status
