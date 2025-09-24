@@ -27,6 +27,8 @@ Design a complete test strategy that identifies what to test, at which level (un
 data:
   - test-levels-framework.md # Unit/Integration/E2E decision criteria
   - test-priorities-matrix.md # P0/P1/P2/P3 classification system
+  - gherkin-standards.md # Gherkin scenario writing standards and conventions
+  - cucumber-integration.md # Cucumber + Playwright setup and patterns
 ```
 
 ## Process
@@ -50,18 +52,29 @@ Quick rules:
 - **Integration**: Component interactions, DB operations
 - **E2E**: Critical user journeys, compliance
 
-### 3. Assign Priorities
+### 3. Apply Gherkin/BDD Override Rules
+
+**CRITICAL FIRST CHECK:** Load `test-priorities-matrix.md` for Gherkin override rules
+
+**Mandatory Gherkin Requirements:**
+- ALL user-facing stories require comprehensive Gherkin scenarios regardless of priority
+- Feature files must exist before development begins
+- All scenarios (happy/unhappy/edge/security) must pass before story completion
+
+### 4. Assign Traditional Test Priorities
 
 **Reference:** Load `test-priorities-matrix.md` for classification
 
-Quick priority assignment:
+Quick priority assignment for non-Gherkin tests:
 
 - **P0**: Revenue-critical, security, compliance
 - **P1**: Core user journeys, frequently used
 - **P2**: Secondary features, admin functions
 - **P3**: Nice-to-have, rarely used
 
-### 4. Design Test Scenarios
+**Note:** Gherkin scenarios override traditional priority classification for user-facing functionality
+
+### 5. Design Test Scenarios
 
 For each identified test need, create:
 
@@ -69,20 +82,23 @@ For each identified test need, create:
 test_scenario:
   id: '{epic}.{story}-{LEVEL}-{SEQ}'
   requirement: 'AC reference'
-  priority: P0|P1|P2|P3
-  level: unit|integration|e2e
+  priority: P0|P1|P2|P3|GHERKIN-MANDATORY
+  level: unit|integration|e2e|gherkin
   description: 'What is being tested'
   justification: 'Why this level was chosen'
   mitigates_risks: ['RISK-001'] # If risk profile exists
+  gherkin_coverage: true|false # Indicates if covered by Gherkin scenarios
 ```
 
-### 5. Validate Coverage
+### 6. Validate Coverage
 
 Ensure:
 
-- Every AC has at least one test
-- No duplicate coverage across levels
-- Critical paths have multiple levels
+- Every AC with user-observable consequences has Gherkin scenarios
+- Every AC has appropriate test coverage (prioritizing Gherkin for user-facing functionality)
+- Traditional E2E/integration tests don't duplicate Gherkin scenario coverage
+- Security issues have both Gherkin scenarios AND API-level tests
+- Critical paths have multiple levels where needed
 - Risk mitigations are addressed
 
 ## Outputs
@@ -100,10 +116,12 @@ Designer: Quinn (Test Architect)
 ## Test Strategy Overview
 
 - Total test scenarios: X
+- Gherkin scenarios: G (mandatory for user-facing ACs)
 - Unit tests: Y (A%)
-- Integration tests: Z (B%)
-- E2E tests: W (C%)
+- Integration tests: Z (B%) (reduced where Gherkin provides coverage)
+- E2E tests: W (C%) (reduced where Gherkin provides coverage)
 - Priority distribution: P0: X, P1: Y, P2: Z
+- User-facing ACs: {count} (all require Gherkin scenarios)
 
 ## Test Scenarios by Acceptance Criteria
 
@@ -125,11 +143,12 @@ Designer: Quinn (Test Architect)
 
 ## Recommended Execution Order
 
-1. P0 Unit tests (fail fast)
-2. P0 Integration tests
-3. P0 E2E tests
-4. P1 tests in order
-5. P2+ as time permits
+1. **ALL Gherkin scenarios first** (mandatory gate for user-facing stories)
+2. P0 Unit tests (fail fast)
+3. P0 Integration/API tests (especially for security)
+4. P0 E2E tests (only where not covered by Gherkin)
+5. P1 tests in order
+6. P2+ as time permits
 ```
 
 ### Output 2: Gate YAML Block
@@ -139,15 +158,21 @@ Generate for inclusion in quality gate:
 ```yaml
 test_design:
   scenarios_total: X
+  gherkin_required: true|false # Based on user-facing ACs
+  gherkin_scenarios: G
   by_level:
     unit: Y
-    integration: Z
-    e2e: W
+    integration: Z (reduced where Gherkin covers)
+    e2e: W (reduced where Gherkin covers)
+    gherkin: G
   by_priority:
     p0: A
     p1: B
     p2: C
+    gherkin_mandatory: G
   coverage_gaps: [] # List any ACs without tests
+  gherkin_gaps: [] # List any user-facing ACs without Gherkin scenarios
+  security_api_tests: [] # Security scenarios requiring additional API tests
 ```
 
 ### Output 3: Issue Comment
@@ -159,27 +184,33 @@ gh issue comment {story_issue_number} --body "## Test Design Complete
 
 **Test Design Matrix**: qa.qaLocation/assessments/{epic}.{story}-test-design-{YYYYMMDD}.md
 **Total Test Scenarios**: {total}
-**P0 Tests Identified**: {count}
+**Gherkin Scenarios**: {gherkin_count} (mandatory for user-facing ACs)
+**Traditional E2E/Integration**: Reduced where Gherkin provides coverage
+**Security API Tests**: {security_api_count} (additional to Gherkin for security)
 **Coverage Gaps**: {gap_count}
 
-{summary of test strategy and key gaps}"
+{summary of test strategy emphasizing Gherkin-first approach}"
 ```
 
 ## Quality Checklist
 
 Before finalizing, verify:
 
-- [ ] Every AC has test coverage
+- [ ] Every AC with user-observable consequences has Gherkin scenarios
+- [ ] Traditional E2E/integration tests don't duplicate Gherkin coverage
+- [ ] Security issues have both Gherkin scenarios AND API-level tests
 - [ ] Test levels are appropriate (not over-testing)
-- [ ] No duplicate coverage across levels
 - [ ] Priorities align with business risk
 - [ ] Test IDs follow naming convention
 - [ ] Scenarios are atomic and independent
+- [ ] Security scenarios included in Gherkin for user inputs
 
 ## Key Principles
 
-- **Shift left**: Prefer unit over integration, integration over E2E
+- **Gherkin First**: ALL user-facing functionality requires Gherkin scenarios (overrides priority)
+- **Efficient coverage**: Gherkin scenarios can replace traditional E2E/integration for user-facing ACs
+- **Security Exception**: Security issues require both Gherkin scenarios AND API-level tests
+- **Shift left**: Prefer unit tests for business logic, Gherkin for user interactions
 - **Risk-based**: Focus on what could go wrong
-- **Efficient coverage**: Test once at the right level
 - **Maintainability**: Consider long-term test maintenance
-- **Fast feedback**: Quick tests run first
+- **Fast feedback**: Gherkin scenarios run first, followed by quick traditional tests

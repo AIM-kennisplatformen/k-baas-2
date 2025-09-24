@@ -20,6 +20,8 @@ agent_config:
     - Status
     - Story
     - Acceptance Criteria
+    - Gherkin Scenarios
+    - Step Definitions Status
     - Tasks / Subtasks
     - Dev Notes
     - Testing
@@ -53,6 +55,60 @@ sections:
     elicit: true
     owner: scrum-master
     editors: [scrum-master]
+
+  - id: gherkin-scenarios
+    title: Gherkin Scenarios
+    type: text
+    instruction: |
+      Comprehensive Gherkin feature file with scenarios covering:
+      - Happy path scenarios (primary user journeys)
+      - Unhappy path scenarios (validation failures, errors)
+      - Edge case scenarios (boundary conditions, empty inputs)
+      - Security scenarios (malicious input testing)
+      
+      This section is populated by QA Agent using create-feature-files task.
+      All user-observable acceptance criteria MUST have corresponding Gherkin scenarios.
+    template: |
+      **Feature File:** `features/{epic_slug}/{story_slug}.feature`
+      
+      **Status:** 🟡 Pending creation (use `*feature-files {story}` command)
+      
+      **Scenario Coverage Required:**
+      - [ ] Happy path scenarios for each AC with user-observable consequences
+      - [ ] Unhappy path scenarios (validation, errors)
+      - [ ] Edge case scenarios (boundary conditions)
+      - [ ] Security scenarios (malicious input protection)
+      
+      **Gherkin Content:** [Will be populated by QA Agent]
+    owner: qa-agent
+    editors: [qa-agent]
+
+  - id: step-definitions-status
+    title: Step Definitions Status
+    type: text
+    instruction: |
+      Track the creation and implementation status of Cucumber step definitions.
+      Step definitions provide the implementation bridge between Gherkin scenarios and test code.
+      This section is managed by both QA Agent (creation) and Dev Agent (implementation).
+    template: |
+      **Step Definition Files:**
+      - `tests/steps/{story_slug}-steps.js` (Playwright-based)
+      - `tests/steps/security-steps.js` (Security scenarios)
+      - `tests/support/hooks.js` (Playwright setup)
+      
+      **Creation Status:** 🟡 Pending (use `*step-defs {story}` command)
+      **Implementation Status:** 🔴 Not started
+      **Execution Status:** ⚪ Not tested
+      
+      **Step Definition Counts:**
+      - Given steps: 0
+      - When steps: 0
+      - Then steps: 0
+      - Security steps: 0
+      
+      **Implementation Notes:** [Updated by Dev Agent during implementation]
+    owner: qa-agent
+    editors: [qa-agent, dev-agent]
 
   - id: tasks-subtasks
     title: Tasks / Subtasks

@@ -71,10 +71,15 @@ commands:
   - risk-profile {story}: Execute risk-profile task to generate risk assessment matrix
   - test-design {story}: Execute test-design task to create comprehensive test scenarios
   - trace {story}: Execute trace-requirements task to map requirements to tests using Given-When-Then
+  - feature-files {story}: Execute create-feature-files task to generate comprehensive Gherkin scenarios from acceptance criteria
+  - step-defs {story}: Execute create-step-definitions task to create Cucumber step definitions with Playwright integration
+  - gherkin-review {story}: Validate Gherkin feature file completeness and scenario coverage for comprehensive testing
   - exit: Say goodbye as the Test Architect, and then abandon inhabiting this persona
 dependencies:
   data:
     - technical-preferences.md
+    - gherkin-standards.md
+    - cucumber-integration.md
   tasks:
     - nfr-assess.md
     - qa-gate.md
@@ -82,6 +87,8 @@ dependencies:
     - risk-profile.md
     - test-design.md
     - trace-requirements.md
+    - create-feature-files.md
+    - create-step-definitions.md
   templates:
     - qa-gate-tmpl.yaml
     - story-tmpl.yaml

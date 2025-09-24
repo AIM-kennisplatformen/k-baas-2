@@ -52,13 +52,29 @@ The goal is quality delivery, not just checking boxes.]]
    - [ ] All tests (unit, integration, E2E if applicable) pass successfully.
    - [ ] Test coverage meets project standards (if defined).
 
-4. **Functionality & Verification:**
+4. **Gherkin/BDD Requirements (MANDATORY for User-Facing Stories):**
+
+   [[LLM: CRITICAL - All Gherkin scenarios must pass before story can be marked "Review". This overrides ALL priority classifications.]]
+   - [ ] Feature file exists for all acceptance criteria with user-observable consequences.
+   - [ ] Gherkin scenarios cover ALL required scenario types:
+     - [ ] Happy path scenarios (primary user journeys)
+     - [ ] Unhappy path scenarios (validation failures, error handling)
+     - [ ] Edge case scenarios (boundary conditions, empty inputs)
+     - [ ] Security scenarios (malicious input protection)
+   - [ ] All Cucumber step definitions are implemented with Playwright integration.
+   - [ ] ALL Gherkin scenarios pass successfully (no failing scenarios allowed).
+   - [ ] Step definitions use proper Playwright patterns for browser automation.
+   - [ ] Security scenarios properly test malicious input rejection.
+   - [ ] Feature files follow project gherkin-standards.md conventions.
+   - [ ] Step definitions follow cucumber-integration.md patterns.
+
+5. **Functionality & Verification:**
 
    [[LLM: Did you actually run and test your code? Be specific about what you tested]]
    - [ ] Functionality has been manually verified by the developer (e.g., running the app locally, checking UI, testing API endpoints).
    - [ ] Edge cases and potential error conditions considered and handled gracefully.
 
-5. **Story Administration:**
+6. **Story Administration:**
 
    [[LLM: Documentation helps the next developer. What should they know?]]
    - [ ] All task sub-issues are marked as complete (closed).
@@ -66,7 +82,7 @@ The goal is quality delivery, not just checking boxes.]]
    - [ ] A development summary comment has been added with notes of changes or information relevant to the next story or overall project, the agent model that was primarily used during development, and the changelog of any changes.
    - [ ] File list of modified/created files is documented in issue comments.
 
-6. **Dependencies, Build & Configuration:**
+7. **Dependencies, Build & Configuration:**
 
    [[LLM: Build issues block everyone. Ensure everything compiles and runs cleanly]]
    - [ ] Project builds successfully without errors.
@@ -76,7 +92,7 @@ The goal is quality delivery, not just checking boxes.]]
    - [ ] No known security vulnerabilities introduced by newly added and approved dependencies.
    - [ ] If new environment variables or configurations were introduced by the story, they are documented and handled securely.
 
-7. **Documentation (If Applicable):**
+8. **Documentation (If Applicable):**
 
    [[LLM: Good documentation prevents future confusion. What needs explaining?]]
    - [ ] Relevant inline code documentation (e.g., JSDoc, TSDoc, Python docstrings) for new public APIs or complex logic is complete.
@@ -93,14 +109,18 @@ After completing the checklist:
 2. List any items marked as [ ] Not Done with explanations
 3. Identify any technical debt or follow-up work needed
 4. Note any challenges or learnings for future stories
-5. Confirm whether the story is truly ready for review
+5. **CRITICAL**: Confirm ALL Gherkin scenarios pass (mandatory for user-facing stories)
+6. Confirm whether the story is truly ready for review
 
 Add this summary as a comment to the story issue, then update issue status:
 - If ready: `github-issue-manager.sh update-status {issue_number} "Review"` and add "ready-for-review" label
 - If not ready: Keep current status and add "dev-incomplete" label
 
+**GHERKIN ENFORCEMENT**: Stories with user-observable functionality CANNOT be marked "Review" with failing Gherkin scenarios, regardless of other completion status.
+
 Be honest - it's better to flag issues now than have them discovered later.]]
 
 - [ ] I, the Developer Agent, confirm that all applicable items above have been addressed.
+- [ ] **CRITICAL**: All Gherkin scenarios pass (for user-facing stories) - this overrides ALL other considerations.
 - [ ] DoD checklist results have been added as an issue comment.
 - [ ] Issue status and labels have been updated appropriately.

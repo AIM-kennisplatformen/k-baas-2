@@ -4,6 +4,34 @@
 
 Guide for prioritizing test scenarios based on risk, criticality, and business impact.
 
+## GHERKIN/BDD OVERRIDE RULES (MANDATORY)
+
+**CRITICAL: The following TDD with Cucumber/Gherkin requirements override ALL priority-based testing decisions:**
+
+### Mandatory Gherkin Requirements
+- **EVERY user-story with user-observable consequences MUST have comprehensive Gherkin scenarios**
+- **This requirement applies regardless of P0/P1/P2/P3 priority classification**
+- **No story can reach "Review" status without ALL Gherkin scenarios passing**
+
+### Comprehensive Scenario Coverage Required
+All user-facing stories MUST include Gherkin scenarios for:
+1. **Happy path scenarios** - Primary user journeys succeeding as expected
+2. **Unhappy path scenarios** - Validation failures, errors, edge cases
+3. **Edge case scenarios** - Boundary conditions, empty inputs, concurrent operations
+4. **Security scenarios** - Malicious input protection, authorization bypass prevention
+
+### Implementation Requirements
+- Feature files created before any development work begins
+- Cucumber step definitions implemented with Playwright browser automation
+- All scenarios must pass before story completion
+- Security scenarios mandatory for all user inputs
+
+### Exceptions
+- Infrastructure/refactoring stories without user-observable consequences may skip Gherkin requirements
+- Backend-only changes with no user-visible impact may use traditional unit/integration testing
+
+**NOTE:** This TDD approach augments (does not replace) the existing BMAD testing policy but takes precedence for user-facing functionality.
+
 ## Priority Levels
 
 ### P0 - Critical (Must Test)
@@ -163,6 +191,27 @@ Is it revenue-critical?
 3. Execute P2 tests if time permits
 4. P3 tests only in full regression cycles
 
+## Integration with Gherkin/BDD Requirements
+
+### Priority-Gherkin Mapping
+While Gherkin scenarios are mandatory for ALL user-facing stories regardless of priority, the traditional priority matrix still applies for:
+
+- **Unit test coverage depth** - P0 requires >90%, P1 requires >80%, etc.
+- **Integration test scope** - Higher priorities get more comprehensive integration testing
+- **Performance testing requirements** - P0 gets load testing, P1 gets basic validation
+- **Manual testing procedures** - Lower priorities may rely more on manual verification
+
+### Execution Strategy
+1. **ALL Gherkin scenarios execute first** (mandatory gate)
+2. Execute traditional P0 tests (fail fast on critical issues)
+3. Execute P1 tests (core functionality)
+4. Execute P2/P3 tests as time permits
+
+### Quality Gates
+- **Gherkin Gate**: ALL scenarios pass (mandatory for user-facing stories)
+- **Priority Gates**: Traditional P0/P1/P2/P3 coverage requirements
+- **Story cannot proceed without passing BOTH gates**
+
 ## Continuous Adjustment
 
 Review and adjust priorities based on:
@@ -172,3 +221,5 @@ Review and adjust priorities based on:
 - Usage analytics
 - Test failure history
 - Business priority changes
+- **Gherkin scenario failure patterns**
+- **Security scenario effectiveness**
