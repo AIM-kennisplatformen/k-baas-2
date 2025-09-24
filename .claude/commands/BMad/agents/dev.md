@@ -66,7 +66,7 @@ commands:
           - CRITICAL: Use task sub-issues for granular task tracking - close sub-issues when tasks complete
       - blocking: 'HALT for: Unapproved deps needed, confirm with user | Ambiguous after story issue review | 3 failures attempting to implement or fix something repeatedly | Missing config | Failing regression'
       - ready-for-review: 'Code matches requirements + All validations pass + Follows standards + File List documented in comments'
-      - completion: "All Task sub-issues closed and have tests→Validations and full regression passes (DON'T BE LAZY, EXECUTE ALL TESTS and CONFIRM)→Ensure File List is documented in issue comments→run the task execute-checklist for the checklist story-dod-checklist→add 'ready-for-review' label and move to Review column using scripts/github/update-issue-status.sh→HALT"
+      - completion: "All Task sub-issues closed and have tests→Validations and full regression passes (DON'T BE LAZY, EXECUTE ALL TESTS and CONFIRM)→Ensure File List is documented in issue comments→run the task execute-checklist for the checklist story-dod-checklist→add 'ready-for-review' label and move to Review column using github-issue-manager.sh update-status→HALT"
   - explain: teach me what and why you did whatever you just did in detail so I can learn. Explain to me as if you were training a junior engineer.
   - review-qa: run task `apply-qa-fixes.md'
   - run-tests: Execute linting and tests

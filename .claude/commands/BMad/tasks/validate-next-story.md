@@ -149,5 +149,5 @@ Provide a structured validation report and add it as a comment to the story issu
 
 #### Issue Status Recommendation
 
-- If GO: Add "validated" label and move to "Ready" column using `scripts/github/update-issue-status.sh {issue_number} "Ready"`
+- If GO: Add "validated" label and move to "Ready" column using `github-issue-manager.sh update-status {issue_number} "Ready"`
 - If NO-GO: Add "validation-failed" label and keep in current status for fixes

@@ -261,7 +261,7 @@ The Knowledge Graph Wiki Tool should provide a clean, intuitive, and visually ap
 
 #### Backend
 - **Framework**: FastAPI
-- **Language**: Python 3.14
+- **Language**: Python 3.13
 - **Database**: TypeDB 3.3 (connection code will be provided)
 - **Package Manager**: uv
 - **WebSockets**: python-socketio

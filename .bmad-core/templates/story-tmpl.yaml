@@ -5,7 +5,8 @@ template:
   version: 2.0
   output:
     format: github-issue-body
-    script_call: "github-issue-manager.sh create-story {{epic_num}} \"Story {{epic_num}}.{{story_num}}: {{story_title_short}}\" \"{{rendered_body}}\" {{parent_epic_issue_num}}"
+    script_call: "github-issue-manager.sh create-story {{epic_num}} \"Story {{epic_num}}.{{story_num}}: {{story_title_short}}\" \"{{rendered_body}}\" \"{{story_slug}}\" \"{{epic_slug}}\""
+    # slug-creation-rules: derive from story_title_short, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 30 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), omit stop words (e.g., "the", "and", "of")
     title: "Story {{epic_num}}.{{story_num}}: {{story_title_short}}"
     labels: ["story", "epic-{{epic_num}}", "draft"]
     milestone: "Epic {{epic_num}}"
@@ -28,7 +29,7 @@ sections:
   - id: status
     title: Status
     type: choice
-    choices: [Draft, Approved, InProgress, Review, Done]
+    choices: [Backlog, Ready, InProgress, AIReview, Review, Done]
     instruction: Select the current status of the story
     owner: scrum-master
     editors: [scrum-master, dev-agent]
@@ -63,21 +64,23 @@ sections:
       NOTE: In GitHub issues workflow, main tasks will be created as sub-issues.
       Use this section for task descriptions that will become issue titles and bodies.
     template: |
-      - [ ] Task 1: [Brief title] (AC: # if applicable)
+      - Task 1: [Brief title] (AC: # if applicable)
         - Description: [Detailed task description for sub-issue body]
-        - [ ] Subtask1.1...
-      - [ ] Task 2: [Brief title] (AC: # if applicable)
+        - Subtask1.1...
+      - Task 2: [Brief title] (AC: # if applicable)
         - Description: [Detailed task description for sub-issue body]
-        - [ ] Subtask 2.1...
-      - [ ] Task 3: [Brief title] (AC: # if applicable)
+        - Subtask 2.1...
+      - Task 3: [Brief title] (AC: # if applicable)
         - Description: [Detailed task description for sub-issue body]
-        - [ ] Subtask 3.1...
+        - Subtask 3.1...
     elicit: true
     owner: scrum-master
     editors: [scrum-master, dev-agent]
     post_process: |
       For each main task, create sub-issue using:
-      github-issue-manager.sh create-task {{story_num}} "{{task_title}}" "{{task_description}}" {{story_issue_num}}
+      github-issue-manager.sh create-task {{story_num}} "{{task_title}}" "{{task_description}}" "{{epic_slug}}" "{{story_slug}}"
+      slug-creation-rules: derive from task_title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 30 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), omit stop words (e.g., "the", "and", "of")
+      
 
   - id: dev-notes
     title: Dev Notes

@@ -78,7 +78,8 @@ List 1-3 focused stories that complete the epic:
 3. **Story 3:** {{Story title and brief description}}
 
 **Create Epic Issue:** After preparing the content above, execute:
-`github-issue-manager.sh create-epic "{{Enhancement Name}} - Brownfield Enhancement" "{{epic_description_with_all_sections}}"`
+`github-issue-manager.sh create-epic "{{Enhancement Name}} - Brownfield Enhancement" "{{epic_description_with_all_sections}}" "{{epic-slug}}"`
+slug creation rules: derive from Enhancement Name,lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
 
 This will:
 - Create GitHub issue with epic label and milestone
@@ -149,7 +150,8 @@ Once the epic is validated and the epic issue is created, provide this handoff t
 - Each story must include verification that existing functionality remains intact
 
 Create story issues using the create-next-story task or manually with:
-`github-issue-manager.sh create-story {epic_num} "Story {epic_num}.{story_num}: {title}" "{story_body}" {epic_issue_number}`
+`github-issue-manager.sh create-story {epic_num} "Story {epic_num}.{story_num}: {title}" "{story_body}" "{epic_slug}" "{story_slug}"` 
+slug creation rules: derive from title,lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
 
 The epic should maintain system integrity while delivering {{epic goal}}."
 

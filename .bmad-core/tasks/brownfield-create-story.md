@@ -106,10 +106,11 @@ So that {{clear benefit/value}}.
 **Create Story Issue:** After preparing the content above, execute:
 
 If this is a standalone story (no epic):
-`github-issue-manager.sh create-story 1 "{{Specific Enhancement}} - Brownfield Addition" "{{full_story_content}}" ""`
+`github-issue-manager.sh create-story 0 "{{Specific Enhancement}} - Brownfield Addition" "{{full_story_content}}" "" "{{enhancement_slug}}"`
+slug creation rules: derive from title,lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
 
 OR if this belongs to an existing epic:
-`github-issue-manager.sh create-story {epic_num} "Story {epic_num}.{story_num}: {{Specific Enhancement}}" "{{full_story_content}}" {epic_issue_number}`
+`github-issue-manager.sh create-story {epic_num} "Story {epic_num}.{story_num}: {{Specific Enhancement}}" "{{full_story_content}}" "{{epic_slug}}" "{{story_slug}}"`
 
 This will:
 - Create GitHub issue with story label

@@ -105,8 +105,11 @@ ALWAYS cite source documents: `[Source: architecture/{filename}.md#{section}]`
     - Link tasks to ACs where applicable (e.g., `Task 1 (AC: 1, 3)`)
   - Add notes on project structure alignment or discrepancies found in Step 4
 
-- **Create Story Issue**: Execute `github-issue-manager.sh create-story {epicNum} "Story {epicNum}.{storyNum}: {Story Title}" "{rendered_story_body}" {epic_issue_number}`
-- **Create Task Sub-Issues**: For each main task identified in the Tasks/Subtasks section, create sub-issues using `github-issue-manager.sh create-task {storyNum} "{task_title}" "{task_description}" {story_issue_number}`
+- **Create Story Issue**: Execute `github-issue-manager.sh create-story {epicNum} "Story {epicNum}.{storyNum}: {Story Title}" "{rendered_story_body}" "{epic_slug}" "{story_slug}"`
+- **Create Task Sub-Issues**: For each main task identified in the Tasks/Subtasks section, create sub-issues using `github-issue-manager.sh create-task {storyNum} "{task_title}" "{task_description}" "{epic_slug}" "{story_slug}"`
+
+slug creation rules: derive from title,lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
+
 
 ### 6. Story Draft Completion and Review
 

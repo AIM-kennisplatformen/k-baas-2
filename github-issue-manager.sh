@@ -35,9 +35,9 @@ USAGE:
     ${SCRIPT_NAME} <command> [options]
 
 COMMANDS:
-    create-epic <title> <body>               Create epic issue
-    create-story <epic_num> <title> <body> <parent_epic_num>  Create story issue
-    create-task <story_num> <title> <body> <parent_story_num> Create task issue
+    create-epic <title> <body> <epic_slug>   Create epic issue
+    create-story <epic_num> <title> <body> <epic_slug> <story_slug>  Create story issue
+    create-task <story_num> <title> <body> <epic_slug> <story_slug> Create task issue
     update-status <issue_num> <status>      Update issue status
     list-stories [filter]                   List stories (default: "label:story state:open")
     migrate-stories                          Migrate Markdown stories to issues
@@ -45,13 +45,15 @@ COMMANDS:
     version                                  Show version information
 
 EXAMPLES:
-    ${SCRIPT_NAME} create-epic "Epic 1: Foundation" "Setup basic infrastructure"
-    ${SCRIPT_NAME} create-story 1 "User Auth" "As a user I want to login" 15
+    ${SCRIPT_NAME} create-epic "Epic 1: Foundation" "Setup basic infrastructure" "foundation"
+    ${SCRIPT_NAME} create-story 15 "User Auth" "As a user I want to login" "foundation" "user-auth"
+    ${SCRIPT_NAME} create-task 16 "Login form validation" "Implement client-side validation" "foundation" "user-auth"
     ${SCRIPT_NAME} update-status 42 "In Progress"
     ${SCRIPT_NAME} list-stories
     ${SCRIPT_NAME} migrate-stories
 
 For detailed usage examples, see: README.md
+Slug creation tips: derive from title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
 EOF
 }
 
@@ -249,9 +251,10 @@ ensure_project_board() {
 create_epic_issue() {
     local title="$1"
     local body="$2"
+    local epic_slug="$3"
     
-    if [ -z "$title" ] || [ -z "$body" ]; then
-        output_error "Usage: create-epic <title> <body>"
+    if [ -z "$title" ] || [ -z "$body" ] || [ -z "$epic_slug" ]; then
+        output_error "Usage: create-epic <title> <body> <epic_slug>"
     fi
     
     if [ -z "$REPO" ]; then
@@ -260,8 +263,11 @@ create_epic_issue() {
 
     ensure_project_board
     
+    # Create epic label
+    gh label create "epic:$epic_slug" --description "Epic stories" --color "FFE66D" --repo "$REPO" 2>/dev/null || true
+
     # Create issue and capture the issue number directly
-    local issue_url=$(gh issue create --repo "$REPO" --title "$title" --body "$body" --label "epic")
+    local issue_url=$(gh issue create --repo "$REPO" --title "$title" --body "$body" --label "epic,epic:$epic_slug")
     if [ $? -ne 0 ]; then
         output_error "Failed to create epic issue"
     fi
@@ -317,10 +323,11 @@ create_story_issue() {
     local epic_num="$1"
     local title="$2"
     local body="$3"
-    local parent_epic_num="$4"
+    local epic_slug="$4"
+    local story_slug="$5"
     
-    if [ -z "$epic_num" ] || [ -z "$title" ] || [ -z "$body" ] || [ -z "$parent_epic_num" ]; then
-        output_error "Usage: create-story <epic_num> <title> <body> <parent_epic_num>"
+    if [ -z "$epic_num" ] || [ -z "$title" ] || [ -z "$body" ] || [ -z "$epic_slug" ] || [ -z "$story_slug" ]; then
+        output_error "Usage: create-story <epic_num> <title> <body> <epic_slug> <story_slug>"
     fi
     
     if [ -z "$REPO" ]; then
@@ -329,17 +336,27 @@ create_story_issue() {
 
     ensure_project_board
     
-    # Enhance body with parent epic reference
-    local enhanced_body="$body
+    # Enhance body with parent epic reference (only if epic slug exists)
+    local enhanced_body="$body"
+    if [ -n "$epic_slug" ] && [ "$epic_slug" != "" ]; then
+        enhanced_body="$body
 
-Parent Epic: #$parent_epic_num
-Epic: $epic_num"
+Parent Epic: $epic_slug (#$epic_num)"
+    fi
     
-    # Create epic-specific label if it doesn't exist
-    gh label create "epic-$epic_num" --description "Epic $epic_num stories" --color "FFE66D" --repo "$REPO" 2>/dev/null || true
-    
+    # Create labels if slugs are not empty
+    local labels="story"
+    if [ -n "$epic_slug" ] && [ "$epic_slug" != "" ]; then
+        gh label create "epic:$epic_slug" --description "Epic $epic_num stories" --color "FFE66D" --repo "$REPO" 2>/dev/null || true
+        labels="$labels,epic:$epic_slug"
+    fi
+    if [ -n "$story_slug" ] && [ "$story_slug" != "" ]; then
+        gh label create "story:$story_slug" --description "Story $story_slug" --color "A2E4B8" --repo "$REPO" 2>/dev/null || true
+        labels="$labels,story:$story_slug"
+    fi
+
     # Create story issue and capture the issue number directly
-    local issue_url=$(gh issue create --repo "$REPO" --title "$title" --body "$enhanced_body" --label "story,epic-$epic_num")
+    local issue_url=$(gh issue create --repo "$REPO" --title "$title" --body "$enhanced_body" --label "$labels")
     if [ $? -ne 0 ]; then
         output_error "Failed to create story issue"
     fi
@@ -349,9 +366,9 @@ Epic: $epic_num"
         output_error "Failed to parse story issue number"
     fi
     
-    # Assign to milestone if it exists - get epic title from parent epic issue
-    if [ -n "$parent_epic_num" ] && [ "$parent_epic_num" != "" ]; then
-        local epic_title=$(gh issue view "$parent_epic_num" --repo "$REPO" --json title 2>/dev/null | jq -r '.title // empty')
+    # Assign to milestone if it exists - get epic title from epic issue
+    if [ -n "$epic_num" ] && [ "$epic_num" != "" ]; then
+        local epic_title=$(gh issue view "$epic_num" --repo "$REPO" --json title 2>/dev/null | jq -r '.title // empty')
         if [ -n "$epic_title" ] && [ "$epic_title" != "null" ]; then
             local milestone_num=$(gh api "repos/$REPO/milestones" | jq -r --arg epic_title "$epic_title" '[.[] | select(.title == $epic_title)] | .[0].number // empty')
             if [ -n "$milestone_num" ]; then
@@ -366,7 +383,7 @@ Epic: $epic_num"
             log_warning "Could not get epic title for milestone assignment"
         fi
     else
-        log_info "No parent epic specified, skipping milestone assignment"
+        log_info "No epic specified, skipping milestone assignment"
     fi
     
     # Add to project and set status to Backlog
@@ -390,9 +407,9 @@ Epic: $epic_num"
         log_warning "Failed to add story to project, manual addition needed"
     fi
     
-    # Create sub-issue relationship with parent epic (only if parent epic exists)
-    if [ -n "$parent_epic_num" ] && [ "$parent_epic_num" != "" ]; then
-        create_sub_issue_relationship "$parent_epic_num" "$story_num"
+    # Create sub-issue relationship with epic (only if epic exists)
+    if [ -n "$epic_num" ] && [ "$epic_num" != "" ]; then
+        create_sub_issue_relationship "$epic_num" "$story_num"
     fi
     
     output_json "{\"story_number\": $story_num}"
@@ -402,10 +419,11 @@ create_task_issue() {
     local story_num="$1"
     local title="$2"
     local body="$3"
-    local parent_story_num="$4"
+    local epic_slug="$4"
+    local story_slug="$5"
     
-    if [ -z "$story_num" ] || [ -z "$title" ] || [ -z "$body" ] || [ -z "$parent_story_num" ]; then
-        output_error "Usage: create-task <story_num> <title> <body> <parent_story_num>"
+    if [ -z "$story_num" ] || [ -z "$title" ] || [ -z "$body" ]; then
+        output_error "Usage: create-task <story_num> <title> <body> <epic_slug> <story_slug>"
     fi
     
     if [ -z "$REPO" ]; then
@@ -417,14 +435,35 @@ create_task_issue() {
     # Enhance body with parent story reference
     local enhanced_body="$body
 
-Parent Story: #$parent_story_num
-Story: $story_num"
+Parent Story: #$story_num"
     
+    # Add slug information only if slugs are not empty
+    if [ -n "$story_slug" ] && [ "$story_slug" != "" ]; then
+        enhanced_body="$enhanced_body
+Story Slug: $story_slug"
+    fi
+    
+    if [ -n "$epic_slug" ] && [ "$epic_slug" != "" ]; then
+        enhanced_body="$enhanced_body
+Epic Slug: $epic_slug"
+    fi
+
     # Create story-specific label if it doesn't exist
     gh label create "story-$story_num" --description "Story #$story_num tasks" --color "A2E4B8" --repo "$REPO" 2>/dev/null || true
     
+    # Create labels if slugs are not empty (analoog aan story issues)
+    local labels="task,story-$story_num"
+    if [ -n "$epic_slug" ] && [ "$epic_slug" != "" ]; then
+        gh label create "epic:$epic_slug" --description "Epic $epic_slug tasks" --color "FFE66D" --repo "$REPO" 2>/dev/null || true
+        labels="$labels,epic:$epic_slug"
+    fi
+    if [ -n "$story_slug" ] && [ "$story_slug" != "" ]; then
+        gh label create "story:$story_slug" --description "Story $story_slug tasks" --color "A2E4B8" --repo "$REPO" 2>/dev/null || true
+        labels="$labels,story:$story_slug"
+    fi
+    
     # Create task issue and capture the issue number directly
-    local issue_url=$(gh issue create --repo "$REPO" --title "$title" --body "$enhanced_body" --label "task,story-$story_num")
+    local issue_url=$(gh issue create --repo "$REPO" --title "$title" --body "$enhanced_body" --label "$labels")
     if [ $? -ne 0 ]; then
         output_error "Failed to create task issue"
     fi
@@ -435,8 +474,8 @@ Story: $story_num"
     fi
     
     # Get milestone from parent story and assign to task
-    if [ -n "$parent_story_num" ] && [ "$parent_story_num" != "" ]; then
-        local parent_milestone=$(gh issue view "$parent_story_num" --repo "$REPO" --json milestone 2>/dev/null | jq -r '.milestone.title // empty')
+    if [ -n "$story_num" ] && [ "$story_num" != "" ]; then
+        local parent_milestone=$(gh issue view "$story_num" --repo "$REPO" --json milestone 2>/dev/null | jq -r '.milestone.title // empty')
         if [ -n "$parent_milestone" ] && [ "$parent_milestone" != "null" ]; then
             local milestone_num=$(gh api "repos/$REPO/milestones" | jq -r --arg parent_milestone "$parent_milestone" '[.[] | select(.title == $parent_milestone)] | .[0].number // empty')
             if [ -n "$milestone_num" ]; then
@@ -476,8 +515,8 @@ Story: $story_num"
     fi
     
     # Create sub-issue relationship with parent story (only if parent story exists)
-    if [ -n "$parent_story_num" ] && [ "$parent_story_num" != "" ]; then
-        create_sub_issue_relationship "$parent_story_num" "$task_num"
+    if [ -n "$story_num" ] && [ "$story_num" != "" ]; then
+        create_sub_issue_relationship "$story_num" "$task_num"
     fi
     
     output_json "{\"task_number\": $task_num}"
@@ -585,20 +624,26 @@ update_issue_status() {
     # Map old column names to new status options for backward compatibility
     local status_value
     case "$column" in
-        "Backlog"|"Next Milestone"|"Ready")
-            status_value="Todo"
+        "Backlog"|"Todo"|"Next Milestone")
+            status_value="Backlog"
             ;;
+        "Ready")
+            status_value="Ready"
+            ;;    
         "In Progress")
             status_value="In Progress"
             ;;
-        "Review"|"Done")
+        "AI Review")
+            status_value="AI Review"
+            ;;
+        "Review")
+            status_value="Review"
+            ;;
+        "Done")
             status_value="Done"
             ;;
-        "Todo")
-            status_value="Todo"
-            ;;
         *)
-            output_error "Invalid status: $column. Available: Todo, In Progress, Done (or legacy: Backlog, Next Milestone, Ready, Review)"
+            output_error "Invalid status: $column. Available: Backlog, Ready, In Progress, AI Review, Review, Done (or legacy: Todo, Next Milestone)"
             ;;
     esac
     
@@ -800,7 +845,8 @@ migrate_md_to_issues() {
 Stories in this epic:
 $(find "$story_dir" -name "$epic_num.*.md" -exec basename {} \; | sort)"
                 
-                local result=$(create_epic_issue "$epic_title" "$epic_body" 2>&1)
+                local epic_slug="epic-$epic_num"
+                local result=$(create_epic_issue "$epic_title" "$epic_body" "$epic_slug" 2>&1)
                 if echo "$result" | jq -e '.epic_number' >/dev/null 2>&1; then
                     local epic_issue_num=$(echo "$result" | jq -r '.epic_number')
                     epic_issues[$epic_num]=$epic_issue_num
@@ -863,7 +909,10 @@ $dev_notes
 *Migrated from: $filename*"
             
             log_info "Creating story issue: $story_title"
-            local result=$(create_story_issue "$epic_num" "$story_title" "$story_body" "$epic_issue_num" 2>&1)
+            # Generate slugs for migration
+            local epic_slug="epic-$epic_num"
+            local story_slug="story-$epic_num-$story_num"
+            local result=$(create_story_issue "$epic_issue_num" "$story_title" "$story_body" "$epic_slug" "$story_slug" 2>&1)
             
             if echo "$result" | jq -e '.story_number' >/dev/null 2>&1; then
                 local story_issue_num=$(echo "$result" | jq -r '.story_number')
@@ -916,22 +965,22 @@ main() {
     
     case "$command" in
         "create-epic")
-            if [ $# -lt 2 ]; then
-                output_error "Usage: create-epic <title> <body>"
+            if [ $# -lt 3 ]; then
+                output_error "Usage: create-epic <title> <body> <epic_slug>"
             fi
-            create_epic_issue "$1" "$2"
+            create_epic_issue "$1" "$2" "$3"
             ;;
         "create-story")
-            if [ $# -lt 4 ]; then
-                output_error "Usage: create-story <epic_num> <title> <body> <parent_epic_num>"
+            if [ $# -lt 5 ]; then
+                output_error "Usage: create-story <epic_num> <title> <body> <epic_slug> <story_slug>"
             fi
-            create_story_issue "$1" "$2" "$3" "$4"
+            create_story_issue "$1" "$2" "$3" "$4" "$5"
             ;;
         "create-task")
-            if [ $# -lt 4 ]; then
-                output_error "Usage: create-task <story_num> <title> <body> <parent_story_num>"
+            if [ $# -lt 3 ]; then
+                output_error "Usage: create-task <story_num> <title> <body> <epic_slug> <story_slug>"
             fi
-            create_task_issue "$1" "$2" "$3" "$4"
+            create_task_issue "$1" "$2" "$3" "$4" "$5"
             ;;
         "update-status")
             if [ $# -lt 2 ]; then

@@ -91,7 +91,7 @@ workflow:
         GitHub Integration Setup:
         - Ensure core-config.yaml has github.repo configured
         - Verify gh CLI is authenticated (run 'gh auth status')
-        - Create project board automatically via github-issue-manager.sh (when creating first issue)
+        - Create project board automatically, if it does not exist, via github-issue-manager.sh (when creating first issue)
         - Create epic issues from PRD using github-issue-manager.sh create-epic for each epic
 
     - agent: sm
@@ -103,8 +103,8 @@ workflow:
         Story creation cycle:
         - SM Agent (New Chat): @sm → *create (or use create-next-story task)
         - Creates next story issue from sharded docs using github-issue-manager.sh create-story
-        - Story issue starts with "draft" label in "Backlog" column
-        - Creates task sub-issues using github-issue-manager.sh create-task
+        - Adds story issue to projectboard in "Backlog" column
+        - Creates task sub-issues using github-issue-manager.sh create-task, and adds them to project board in "Backlog" column
         - Returns story issue number for tracking
 
     - agent: analyst/pm
@@ -118,8 +118,7 @@ workflow:
         - Use validate-next-story task with issue number
         - Review story issue completeness and alignment using checklists/story-draft-checklist.md
         - Add validation comment to issue
-        - Update issue status: Draft → Ready using github-issue-manager.sh update-status {issue_number} "Ready"
-        - Add "validated" label to issue
+        - Update issue status: Backlog → Ready using github-issue-manager.sh update-status {issue_number} "Ready"
 
     - agent: dev
       action: implement_story
@@ -128,11 +127,13 @@ workflow:
       notes: |
         Dev Agent (New Chat): @dev
         - Uses story issue number to get requirements: gh issue view {issue_number}
+        - Validates that issue has status "Ready" before starting work
+        - before starting work, moves issue to "In Progress" using github-issue-manager.sh update-status {issue_number} "In Progress"
         - Implements story and completes task sub-issues
+        - After each task sub-issue completion, commits code with short meaningful message that links to sub-issue.
         - Updates File List in issue comments
         - Completes DoD checklist (checklists/story-dod-checklist.md) and adds as comment
-        - Updates issue status to "Review" using github-issue-manager.sh update-status {issue_number} "Review"
-        - Closes completed task sub-issues
+        - Updates issue status to "AI Review" using github-issue-manager.sh update-status {issue_number} "AI Review"
 
     - agent: qa
       action: review_implementation
@@ -142,11 +143,12 @@ workflow:
       notes: |
         OPTIONAL: QA Agent (New Chat): @qa → review-story {issue_number}
         - Senior dev review with refactoring ability using tasks/review-story.md
-        - Fixes small issues directly
+        - Fixes small issues directly, and commits each issue fix separately with meaningful commit message
+        - For larger issues, leaves feedback in issue comments referencing specific DoD checklist items
         - Adds QA results as issue comment
         - Updates issue labels and status based on review
-        - If approved: github-issue-manager.sh update-status {issue_number} "Done"
-        - If changes needed: keeps in "Review" status with feedback
+        - If approved: github-issue-manager.sh update-status {issue_number} "Review"
+        - If changes needed: resets status to "In Progress"
 
     - agent: dev
       action: address_qa_feedback
@@ -156,14 +158,16 @@ workflow:
         If QA left feedback requiring changes:
         - Dev Agent (New Chat): Address QA feedback items from issue comments
         - Update implementation based on QA checklist
-        - Return to QA for final approval by commenting on issue
+        - Commits each change separately with meaningful commit messages
+        - Adds comment summarizing changes made
+        - Return to QA by moving issue back to "AI Review" using github-issue-manager.sh update-status {issue_number} "AI Review"
 
     - step: repeat_development_cycle
       action: continue_for_all_stories
       notes: |
         Repeat story cycle (SM → Dev → QA) for all epic story issues
         Use github-issue-manager.sh list-stories to check for next open stories
-        Continue until all story issues in epic are completed (moved to "Done" column)
+        Continue until all story issues in epic are completed (moved to "Review" column)
         Monitor progress via GitHub project board
 
     - agent: po

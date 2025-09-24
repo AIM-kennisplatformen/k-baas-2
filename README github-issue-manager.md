@@ -87,11 +87,14 @@ github:
 
 ### Issue Creation Commands
 
+These commands require _slugs_: Derive from title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"),omit stop words (e.g., "the", "and", "of")
+
+
 #### `create-epic`
 Create an epic issue with milestone and project board integration.
 
 ```bash
-./github-issue-manager.sh create-epic <title> <body>
+./github-issue-manager.sh create-epic <title> <body> <epic_slug>
 ```
 
 **Examples:**
@@ -104,7 +107,7 @@ This epic covers all foundational work including:
 - CI/CD pipeline
 - Basic infrastructure
 - Development environment
-"
+" "foundation"
 
 # Create a feature epic
 ./github-issue-manager.sh create-epic "Epic 2: User Authentication" "
@@ -113,7 +116,7 @@ Complete user authentication system including:
 - Login/logout
 - Password reset
 - Multi-factor authentication
-"
+" "authentication"
 ```
 
 **Output:**
@@ -125,14 +128,14 @@ Complete user authentication system including:
 Create a story issue as a sub-issue of an epic.
 
 ```bash
-./github-issue-manager.sh create-story <epic_num> <title> <body> <parent_epic_num>
+./github-issue-manager.sh create-story <epic_num> <title> <body> <epic_slug> <story_slug>
 ```
 
 **Examples:**
 
 ```bash
 # Create a user registration story
-./github-issue-manager.sh create-story 2 "User Registration" "
+./github-issue-manager.sh create-story 15 "User Registration" "
 ## Story
 As a new user, I want to register an account so that I can access the application.
 
@@ -149,10 +152,10 @@ As a new user, I want to register an account so that I can access the applicatio
 - Create user database schema
 - Setup email service integration
 - Add registration API endpoint
-" 15
+" "authentication" "user-registration"
 
 # Create a login story
-./github-issue-manager.sh create-story 2 "User Login" "
+./github-issue-manager.sh create-story 15 "User Login" "
 ## Story
 As a registered user, I want to login to my account so that I can access my personal dashboard.
 
@@ -169,7 +172,7 @@ As a registered user, I want to login to my account so that I can access my pers
 - Setup session management
 - Add login API endpoint
 - Handle password reset flow
-" 15
+" "authentication" "user-login"
 ```
 
 **Output:**
@@ -181,7 +184,7 @@ As a registered user, I want to login to my account so that I can access my pers
 Create a task issue as a sub-issue of a story.
 
 ```bash
-./github-issue-manager.sh create-task <story_num> <title> <body> <parent_story_num>
+./github-issue-manager.sh create-task <story_num> <title> <body> <epic_slug> <story_slug>
 ```
 
 **Examples:**
@@ -205,7 +208,7 @@ Design and implement the user registration form with proper validation and user 
 - [ ] Form submission shows loading state
 - [ ] Error messages are user-friendly
 - [ ] Form is accessible (ARIA labels)
-" 16
+" "authentication" "user-registration"
 
 # Create an API task
 ./github-issue-manager.sh create-task 16 "Implement Registration API Endpoint" "
@@ -225,7 +228,7 @@ Create secure API endpoint for user registration with proper validation and erro
 - [ ] Passwords are securely hashed
 - [ ] Duplicate email handling
 - [ ] API documentation updated
-" 16
+" "authentication" "user-registration"
 ```
 
 **Output:**
@@ -310,7 +313,8 @@ List stories with optional filtering.
     "body": "## Story\nAs a new user...",
     "labels": [
       {"name": "story"},
-      {"name": "epic-2"}
+      {"name": "epic:authentication"},
+      {"name": "story:user-registration"}
     ],
     "assignees": [],
     "milestone": {
@@ -424,13 +428,13 @@ This epic covers all data-related functionality including:
 - Data models and relationships
 - Data validation and integrity
 - Backup and recovery procedures
-")
+" "data-management")
 
 EPIC_NUM=$(echo "$EPIC_RESULT" | jq -r '.epic_number')
 echo "Created Epic #$EPIC_NUM"
 
 # 2. Create stories for the epic
-STORY1_RESULT=$(./github-issue-manager.sh create-story 3 "Database Schema Design" "
+STORY1_RESULT=$(./github-issue-manager.sh create-story $EPIC_NUM "Database Schema Design" "
 ## Story
 As a developer, I want a well-designed database schema so that data is properly organized and performant.
 
@@ -439,19 +443,19 @@ As a developer, I want a well-designed database schema so that data is properly 
 - [ ] Primary and foreign keys defined
 - [ ] Indexes planned for performance
 - [ ] Migration scripts prepared
-" $EPIC_NUM)
+" "data-management" "db-schema-design")
 
 STORY1_NUM=$(echo "$STORY1_RESULT" | jq -r '.story_number')
 echo "Created Story #$STORY1_NUM"
 
 # 3. Create tasks for the story
-./github-issue-manager.sh create-task 3 "Create ER Diagram" "
+./github-issue-manager.sh create-task $STORY1_NUM "Create ER Diagram" "
 Design entity relationship diagram showing all tables, relationships, and constraints.
-" $STORY1_NUM
+" "data-management" "db-schema-design"
 
-./github-issue-manager.sh create-task 3 "Write Migration Scripts" "
+./github-issue-manager.sh create-task $STORY1_NUM "Write Migration Scripts" "
 Create database migration scripts for initial schema setup.
-" $STORY1_NUM
+" "data-management" "db-schema-design"
 
 # 4. Start working on the epic
 ./github-issue-manager.sh update-status $EPIC_NUM "In Progress"
@@ -488,11 +492,12 @@ done
 
 create_user_story() {
     local epic_num=$1
-    local parent_epic_num=$2
+    local epic_slug=$2
     local feature_name=$3
-    local user_type=$4
-    local action=$5
-    local benefit=$6
+    local story_slug=$4
+    local user_type=$5
+    local action=$6
+    local benefit=$7
     
     local story_body="
 ## Story
@@ -512,18 +517,18 @@ As a $user_type, I want to $action so that $benefit.
 - Consider performance implications
 "
     
-    ./github-issue-manager.sh create-story $epic_num "$feature_name" "$story_body" $parent_epic_num
+    ./github-issue-manager.sh create-story $epic_num "$feature_name" "$story_body" "$epic_slug" "$story_slug"
 }
 
 # Create multiple related stories
-EPIC_NUM=2
-PARENT_EPIC=15
+EPIC_NUM=15
+EPIC_SLUG="authentication"
 
-create_user_story $EPIC_NUM $PARENT_EPIC "User Profile Management" "registered user" "manage my profile information" "I can keep my account details up to date"
+create_user_story $EPIC_NUM "$EPIC_SLUG" "User Profile Management" "user-profile" "registered user" "manage my profile information" "I can keep my account details up to date"
 
-create_user_story $EPIC_NUM $PARENT_EPIC "Password Change" "registered user" "change my password" "I can maintain account security"
+create_user_story $EPIC_NUM "$EPIC_SLUG" "Password Change" "password-change" "registered user" "change my password" "I can maintain account security"
 
-create_user_story $EPIC_NUM $PARENT_EPIC "Account Deletion" "registered user" "delete my account" "I can remove my data when no longer needed"
+create_user_story $EPIC_NUM "$EPIC_SLUG" "Account Deletion" "account-deletion" "registered user" "delete my account" "I can remove my data when no longer needed"
 ```
 
 ## Configuration
@@ -560,9 +565,10 @@ The script automatically:
 
 The script automatically creates and manages these labels:
 - `epic` - Applied to all epic issues
-- `story` - Applied to all story issues  
+- `story` - Applied to all story issues
 - `task` - Applied to all task issues
-- `epic-{num}` - Applied to stories belonging to specific epic
+- `epic:{epic_slug}` - Applied to epics and stories with specific epic slug
+- `story:{story_slug}` - Applied to stories with specific story slug
 - `story-{num}` - Applied to tasks belonging to specific story
 - `migrated` - Applied to issues created via migration
 
@@ -602,7 +608,7 @@ For verbose output, you can modify the script to show more details:
 You can validate operation results using standard JSON parsing:
 
 ```bash
-RESULT=$(./github-issue-manager.sh create-epic "Important Epic" "Critical work")
+RESULT=$(./github-issue-manager.sh create-epic "Important Epic" "Critical work" "important")
 if echo "$RESULT" | jq -e '.epic_number' >/dev/null 2>&1; then
     echo "Epic created successfully"
     EPIC_NUM=$(echo "$RESULT" | jq -r '.epic_number')
@@ -642,7 +648,7 @@ If you were previously using individual scripts from `.bmad-core/scripts/github/
 # .bmad-core/scripts/github/create-epic-issue.sh "Epic Title" "Epic Body"
 
 # New way:
-./github-issue-manager.sh create-epic "Epic Title" "Epic Body"
+./github-issue-manager.sh create-epic "Epic Title" "Epic Body" "epic-slug"
 
 # Old way:
 # .bmad-core/scripts/github/update-issue-status.sh 42 "In Progress"

@@ -106,10 +106,11 @@ So that {{clear benefit/value}}.
 **Create Story Issue:** After preparing the content above, execute:
 
 If this is a standalone story (no epic):
-`scripts/github/create-story-issue.sh 1 "{{Specific Enhancement}} - Brownfield Addition" "{{full_story_content}}" ""`
+`github-issue-manager.sh create-story 0 "{{Specific Enhancement}} - Brownfield Addition" "{{full_story_content}}" "" "{{enhancement_slug}}"`
+slug creation rules: derive from title,lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
 
 OR if this belongs to an existing epic:
-`scripts/github/create-story-issue.sh {epic_num} "Story {epic_num}.{story_num}: {{Specific Enhancement}}" "{{full_story_content}}" {epic_issue_number}`
+`github-issue-manager.sh create-story {epic_num} "Story {epic_num}.{story_num}: {{Specific Enhancement}}" "{{full_story_content}}" "{{epic_slug}}" "{{story_slug}}"`
 
 This will:
 - Create GitHub issue with story label
@@ -170,4 +171,4 @@ The story creation is successful when:
 - When in doubt about integration complexity, use brownfield-create-epic instead
 - Stories should take no more than 4 hours of focused development work
 - Story will be tracked as GitHub issue with labels and project board management
-- Use `scripts/github/list-stories.sh` to check existing stories before creating new ones
+- Use `github-issue-manager.sh list-stories` to check existing stories before creating new ones
