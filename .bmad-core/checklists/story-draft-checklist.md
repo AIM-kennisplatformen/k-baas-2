@@ -142,7 +142,7 @@ Generate a concise validation report and add it as a comment to the story issue:
    - What might cause delays or rework?
 
 5. Issue Status Update
-   - If READY: Add "draft-validated" label and move to "Ready" column: `scripts/github/update-issue-status.sh {issue_number} "Ready"`
+   - If READY: Add "draft-validated" label and move to "Ready" column: `github-issue-manager.sh update-status {issue_number} "Ready"`
    - If NEEDS REVISION: Add "draft-needs-revision" label and assign back to story creator
    - If BLOCKED: Add "draft-blocked" label and list blocking dependencies
 

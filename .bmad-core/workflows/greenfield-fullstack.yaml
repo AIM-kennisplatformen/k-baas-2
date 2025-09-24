@@ -91,8 +91,8 @@ workflow:
         GitHub Integration Setup:
         - Ensure core-config.yaml has github.repo configured
         - Verify gh CLI is authenticated (run 'gh auth status')
-        - Create project board if it doesn't exist using scripts/github/ensure-project-board.sh
-        - Create epic issues from PRD using scripts/github/create-epic-issue.sh for each epic
+        - Create project board automatically via github-issue-manager.sh (when creating first issue)
+        - Create epic issues from PRD using github-issue-manager.sh create-epic for each epic
 
     - agent: sm
       action: create_story
@@ -102,9 +102,9 @@ workflow:
       notes: |
         Story creation cycle:
         - SM Agent (New Chat): @sm → *create (or use create-next-story task)
-        - Creates next story issue from sharded docs using scripts/github/create-story-issue.sh
+        - Creates next story issue from sharded docs using github-issue-manager.sh create-story
         - Story issue starts with "draft" label in "Backlog" column
-        - Creates task sub-issues using scripts/github/create-task-issue.sh
+        - Creates task sub-issues using github-issue-manager.sh create-task
         - Returns story issue number for tracking
 
     - agent: analyst/pm
@@ -118,7 +118,7 @@ workflow:
         - Use validate-next-story task with issue number
         - Review story issue completeness and alignment using checklists/story-draft-checklist.md
         - Add validation comment to issue
-        - Update issue status: Draft → Ready using scripts/github/update-issue-status.sh {issue_number} "Ready"
+        - Update issue status: Draft → Ready using github-issue-manager.sh update-status {issue_number} "Ready"
         - Add "validated" label to issue
 
     - agent: dev
@@ -131,7 +131,7 @@ workflow:
         - Implements story and completes task sub-issues
         - Updates File List in issue comments
         - Completes DoD checklist (checklists/story-dod-checklist.md) and adds as comment
-        - Updates issue status to "Review" using scripts/github/update-issue-status.sh {issue_number} "Review"
+        - Updates issue status to "Review" using github-issue-manager.sh update-status {issue_number} "Review"
         - Closes completed task sub-issues
 
     - agent: qa
@@ -145,7 +145,7 @@ workflow:
         - Fixes small issues directly
         - Adds QA results as issue comment
         - Updates issue labels and status based on review
-        - If approved: scripts/github/update-issue-status.sh {issue_number} "Done"
+        - If approved: github-issue-manager.sh update-status {issue_number} "Done"
         - If changes needed: keeps in "Review" status with feedback
 
     - agent: dev
@@ -162,7 +162,7 @@ workflow:
       action: continue_for_all_stories
       notes: |
         Repeat story cycle (SM → Dev → QA) for all epic story issues
-        Use scripts/github/list-stories.sh to check for next open stories
+        Use github-issue-manager.sh list-stories to check for next open stories
         Continue until all story issues in epic are completed (moved to "Done" column)
         Monitor progress via GitHub project board
 
@@ -262,6 +262,6 @@ workflow:
     architect_to_pm: "Please update the PRD with the suggested story changes, then re-export the complete prd.md to docs/."
     updated_to_po: "All documents ready in docs/ folder. Please validate all artifacts for consistency."
     po_issues: "PO found issues with [document]. Please return to [agent] to fix and re-save the updated document."
-    setup_github: "All planning artifacts validated. Configure GitHub integration: 1) Set github.repo in core-config.yaml 2) Authenticate gh CLI 3) Run scripts/github/ensure-project-board.sh 4) Create epic issues from PRD"
-    story_creation: "GitHub integration ready. Use create-next-story task or scripts/github/create-story-issue.sh to create story issues. Track progress on GitHub project board."
+    setup_github: "All planning artifacts validated. Configure GitHub integration: 1) Set github.repo in core-config.yaml 2) Authenticate gh CLI 3) Create epic issues from PRD using github-issue-manager.sh"
+    story_creation: "GitHub integration ready. Use create-next-story task or github-issue-manager.sh create-story to create story issues. Track progress on GitHub project board."
     complete: "All planning artifacts validated and GitHub integration configured. Begin development cycle with story issue creation."

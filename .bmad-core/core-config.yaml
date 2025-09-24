@@ -21,8 +21,8 @@ devLoadAlwaysFiles:
 devDebugLog: .ai/debug-log.md
 devStoryLocation: null  # Deprecated; use GitHub for stories
 github:
-  repo: null  # e.g., "myorg/myproject" – required, set by user
-  project_board: null  # e.g., "BMAD Project" or ID; optional, scripts create if missing
+  repo: AIM-kennisplatformen/k-baas-2  # e.g., "myorg/myproject" – required, set by user
+  project_board: "kennisbaas"  # Project number for existing kennisbaas project
   labels:
     epic: "epic"
     story: "story"

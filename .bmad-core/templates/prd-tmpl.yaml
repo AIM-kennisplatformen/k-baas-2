@@ -138,7 +138,7 @@ sections:
       - Cross Cutting Concerns should flow through epics and stories and not be final stories. For example, adding a logging framework as a last story of an epic, or at the end of a project as a final epic or story would be terrible as we would not have logging from the beginning.
 
       POST-PROCESSING: After PRD completion, create GitHub issues for each epic using:
-      scripts/github/create-epic-issue.sh "{{epic_title}}" "{{epic_description_with_goal}}"
+      github-issue-manager.sh create-epic "{{epic_title}}" "{{epic_description_with_goal}}"
     elicit: true
     examples:
       - "Epic 1: Foundation & Core Infrastructure: Establish project setup, authentication, and basic user management"
@@ -168,7 +168,7 @@ sections:
 
       POST-PROCESSING: After epic details completion, for each story in this epic:
       1. First ensure epic issue exists (get epic issue number from previous step)
-      2. Create story issues using: scripts/github/create-story-issue.sh {{epic_number}} "Story {{epic_number}}.{{story_number}}: {{story_title}}" "{{story_body_with_acceptance_criteria}}" {{epic_issue_number}}
+      2. Create story issues using: github-issue-manager.sh create-story {{epic_number}} "Story {{epic_number}}.{{story_number}}: {{story_title}}" "{{story_body_with_acceptance_criteria}}" {{epic_issue_number}}
     elicit: true
     template: "{{epic_goal}}"
     sections:

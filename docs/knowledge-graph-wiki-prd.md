@@ -318,20 +318,20 @@ The Knowledge Graph Wiki Tool should provide a clean, intuitive, and visually ap
 
 - **V0.7 Epic 1: Project Foundation & Infrastructure**
   - Goal: Establish the foundational infrastructure, repository setup, and core application framework to enable efficient development of subsequent features.
-  - V0.7 Story 1: As a developer, I want a properly configured repository with both frontend and backend projects so that I can efficiently develop and test the application.
-    - V0.7 Set up repository with appropriate project structure
-    - V0.7 Configure JavaScript for frontend
-    - V0.7 Configure Python for backend
-    - V0.7 Set up linting and formatting rules
+  - V0.7 Story 1: As a developer, I want a properly configured repository with both frontend and backend projects in separate directories so that I can efficiently develop and test the application.
+    - V0.7 Set up repository with frontend/ and backend/ directory structure
+    - V0.7 Configure JavaScript/React for frontend directory
+    - V0.7 Configure Python/FastAPI for backend directory
+    - V0.7 Set up linting and formatting rules for both directories
     - V0.7 Configure basic CI/CD with GitHub Actions
   - V0.7 Story 2: As a developer, I want a basic frontend application shell with React 19, Tailwind 4, and Shadcn/ui so that I can start building UI components.
-    - V0.7 Initialize React application with JavaScript
+    - V0.7 Initialize React application with JavaScript in frontend/ directory
     - V0.7 Configure Tailwind and Shadcn/ui
     - V0.7 Create basic layout components
     - V1 Implement theme switching (light/dark/high contrast)
     - V0.7 Set up Jotai for state management
   - V0.7 Story 3: As a developer, I want a basic backend API with FastAPI so that I can start implementing data storage and retrieval.
-    - V0.7 Set up FastAPI application structure
+    - V0.7 Set up FastAPI application structure in backend/ directory
     - V0.7 Integrate provided TypeDB connection code
     - V0.7 Implement basic health check endpoints
     - V0.7 Set up authentication framework

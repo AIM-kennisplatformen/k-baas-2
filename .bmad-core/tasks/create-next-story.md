@@ -21,7 +21,7 @@ To identify the next logical story based on project progress and epic definition
 #### 1.1 Locate Epic Issues and Review Existing Stories
 
 - Based on `prdSharded` from config, locate epic files (sharded location/pattern or monolithic PRD sections)
-- **List Existing Stories**: Execute `scripts/github/list-stories.sh "label:story state:all"` to get all story issues
+- **List Existing Stories**: Execute `github-issue-manager.sh list-stories "label:story state:all"` to get all story issues
 - Parse story issues to find the highest `{epicNum}.{storyNum}` format in issue titles
 - **If highest story exists:**
   - Check story issue state and labels to determine status (open/closed, labels like "done", "in-progress", etc.)
@@ -35,7 +35,7 @@ To identify the next logical story based on project progress and epic definition
 ### 2. Gather Story Requirements and Previous Story Context
 
 - Extract story requirements from the identified epic file
-- **Find Parent Epic Issue**: Use `scripts/github/list-stories.sh "label:epic"` to locate the epic issue for this story
+- **Find Parent Epic Issue**: Use `github-issue-manager.sh list-stories "label:epic"` to locate the epic issue for this story
 - If previous story exists, use `gh issue view {previousStoryIssueNum}` to review:
   - Issue comments containing Dev Agent Records
   - Implementation notes and decisions in issue comments
@@ -105,15 +105,15 @@ ALWAYS cite source documents: `[Source: architecture/{filename}.md#{section}]`
     - Link tasks to ACs where applicable (e.g., `Task 1 (AC: 1, 3)`)
   - Add notes on project structure alignment or discrepancies found in Step 4
 
-- **Create Story Issue**: Execute `scripts/github/create-story-issue.sh {epicNum} "Story {epicNum}.{storyNum}: {Story Title}" "{rendered_story_body}" {epic_issue_number}`
-- **Create Task Sub-Issues**: For each main task identified in the Tasks/Subtasks section, create sub-issues using `scripts/github/create-task-issue.sh {storyNum} "{task_title}" "{task_description}" {story_issue_number}`
+- **Create Story Issue**: Execute `github-issue-manager.sh create-story {epicNum} "Story {epicNum}.{storyNum}: {Story Title}" "{rendered_story_body}" {epic_issue_number}`
+- **Create Task Sub-Issues**: For each main task identified in the Tasks/Subtasks section, create sub-issues using `github-issue-manager.sh create-task {storyNum} "{task_title}" "{task_description}" {story_issue_number}`
 
 ### 6. Story Draft Completion and Review
 
 - Review all sections for completeness and accuracy
 - Verify all source references are included for technical details
 - Ensure tasks align with both epic requirements and architecture constraints
-- **Add to Project Board**: Story issue is automatically added to "Backlog" column by the create-story-issue.sh script
+- **Add to Project Board**: Story issue is automatically added to "Backlog" column by the github-issue-manager.sh script
 - Execute `{root}/tasks/execute-checklist` `{root}/checklists/story-draft-checklist`
 - Provide summary to user including:
   - Story created: GitHub Issue #{story_issue_number} - "Story {epicNum}.{storyNum}: {Story Title}"

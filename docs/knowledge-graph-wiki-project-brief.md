@@ -77,6 +77,7 @@ The primary users are domain experts with specialized knowledge but limited tech
 
 - **Initial Architectural Preferences:**
   - Web-based application for cross-platform accessibility
+  - Single repository with separate frontend/ and backend/ directories (no monorepo tools)
   - Real-time collaboration capabilities similar to Google Docs or Miro
   - Integration with LLM services for AI assistance features
 

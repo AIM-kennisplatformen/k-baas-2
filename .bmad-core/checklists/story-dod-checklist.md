@@ -96,7 +96,7 @@ After completing the checklist:
 5. Confirm whether the story is truly ready for review
 
 Add this summary as a comment to the story issue, then update issue status:
-- If ready: `scripts/github/update-issue-status.sh {issue_number} "Review"` and add "ready-for-review" label
+- If ready: `github-issue-manager.sh update-status {issue_number} "Review"` and add "ready-for-review" label
 - If not ready: Keep current status and add "dev-incomplete" label
 
 Be honest - it's better to flag issues now than have them discovered later.]]

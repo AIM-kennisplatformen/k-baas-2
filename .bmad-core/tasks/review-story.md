@@ -180,7 +180,7 @@ NFR assessment: qa.qaLocation/assessments/{epic}.{story}-nfr-{YYYYMMDD}.md
 ### Issue Status Update
 
 After review completion:
-- If Ready for Done: `scripts/github/update-issue-status.sh {issue_number} "Done"`
+- If Ready for Done: `github-issue-manager.sh update-status {issue_number} "Done"`
 - If Changes Required: Keep in "Review" status and assign back to developer
 - Add/update labels: "qa-complete", "ready" or "changes-required"
 ```
@@ -316,7 +316,7 @@ After review:
 1. Add QA Results comment to the story issue using `gh issue comment {issue_number}`
 2. Create the gate file in directory from `qa.qaLocation/gates`
 3. Update issue status and labels:
-   - If Ready for Done: `scripts/github/update-issue-status.sh {issue_number} "Done"` and add "qa-approved" label
+   - If Ready for Done: `github-issue-manager.sh update-status {issue_number} "Done"` and add "qa-approved" label
    - If Changes Required: Add "changes-required" label and assign back to developer
 4. Update project board column as appropriate
 5. If files were modified, list them in QA Results comment and ask Dev to update File List in issue comments

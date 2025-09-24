@@ -103,8 +103,8 @@ CRITICAL: Dev agent is ONLY authorized to add comments to the story issue. Do no
 - **Change Log**: New dated entry describing applied fixes in comment
 
 **Status Rule**:
-- If gate was PASS and all identified gaps are closed → Add 'ready-for-done' label and move to 'Done' column using `scripts/github/update-issue-status.sh {story_issue_number} "Done"`
-- Otherwise → Add 'ready-for-review' label and move to 'Review' column using `scripts/github/update-issue-status.sh {story_issue_number} "Review"` and notify QA to re-run the review
+- If gate was PASS and all identified gaps are closed → Add 'ready-for-done' label and move to 'Done' column using `github-issue-manager.sh update-status {story_issue_number} "Done"`
+- Otherwise → Add 'ready-for-review' label and move to 'Review' column using `github-issue-manager.sh update-status {story_issue_number} "Review"` and notify QA to re-run the review
 
 ### 6) Do NOT Edit Gate Files
 

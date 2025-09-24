@@ -78,7 +78,7 @@ List 1-3 focused stories that complete the epic:
 3. **Story 3:** {{Story title and brief description}}
 
 **Create Epic Issue:** After preparing the content above, execute:
-`scripts/github/create-epic-issue.sh "{{Enhancement Name}} - Brownfield Enhancement" "{{epic_description_with_all_sections}}"`
+`github-issue-manager.sh create-epic "{{Enhancement Name}} - Brownfield Enhancement" "{{epic_description_with_all_sections}}"`
 
 This will:
 - Create GitHub issue with epic label and milestone
@@ -149,7 +149,7 @@ Once the epic is validated and the epic issue is created, provide this handoff t
 - Each story must include verification that existing functionality remains intact
 
 Create story issues using the create-next-story task or manually with:
-`scripts/github/create-story-issue.sh {epic_num} "Story {epic_num}.{story_num}: {title}" "{story_body}" {epic_issue_number}`
+`github-issue-manager.sh create-story {epic_num} "Story {epic_num}.{story_num}: {title}" "{story_body}" {epic_issue_number}`
 
 The epic should maintain system integrity while delivering {{epic goal}}."
 
