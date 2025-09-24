@@ -137,7 +137,7 @@ Ensure:
 
 ### Output 1: Feature Files
 
-**Save to:** `features/{epic_slug}/{story_slug}.feature`
+**Save to:** `tests/features/{epic_slug}/{story_slug}.feature`
 
 ```gherkin
 # Complete feature file with comprehensive scenarios
@@ -147,12 +147,12 @@ Ensure:
 
 ### Output 2: Feature File Registry
 
-**Update:** `features/feature-registry.md`
+**Update:** `tests/features/feature-registry.md`
 
 ```markdown
 ## Story {epic_num}.{story_num}: {story_title}
 
-- **Feature File:** `features/{epic_slug}/{story_slug}.feature`
+- **Feature File:** `tests/features/{epic_slug}/{story_slug}.feature`
 - **Scenarios Created:** {total_count}
   - Happy Path: {happy_count}
   - Unhappy Path: {unhappy_count}
@@ -169,7 +169,7 @@ Add comment to story issue:
 ```bash
 gh issue comment {story_issue_number} --body "## Gherkin Feature Files Created
 
-**Feature File:** \`features/{epic_slug}/{story_slug}.feature\`
+**Feature File:** \`tests/features/{epic_slug}/{story_slug}.feature\`
 **Total Scenarios:** {total}
 **Coverage Types:**
 - ✅ Happy Path: {happy_count} scenarios

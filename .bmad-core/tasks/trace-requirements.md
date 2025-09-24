@@ -15,6 +15,7 @@ Create a requirements traceability matrix that ensures every acceptance criterio
 - Story file with clear acceptance criteria
 - Access to test files or test specifications
 - Understanding of the implementation
+- **TDD Requirement**: For user-facing stories, feature files must exist in `tests/features/` with implemented step definitions
 
 ## Traceability Process
 
@@ -27,6 +28,7 @@ Identify all testable requirements from:
 - Tasks/subtasks with specific behaviors
 - Non-functional requirements mentioned
 - Edge cases documented
+- **Gherkin scenarios** (if user-facing story has feature files)
 
 ### 2. Map to Test Cases
 
@@ -42,6 +44,13 @@ test_mappings:
     when: 'They submit the login form'
     then: 'They are redirected to dashboard and session is created'
     coverage: full
+
+  - test_file: 'tests/features/epic1/user-auth.feature'
+    test_case: 'User login with valid credentials (Gherkin scenario)'
+    given: 'A registered user exists with valid credentials'
+    when: 'User enters correct email and password and clicks login'
+    then: 'User is redirected to dashboard with welcome message'
+    coverage: e2e_gherkin
 
   - test_file: 'e2e/auth-flow.test.ts'
     test_case: 'complete login flow'
@@ -62,6 +71,7 @@ Evaluate coverage for each requirement:
 - `none`: No test coverage found
 - `integration`: Covered in integration/e2e tests only
 - `unit`: Covered in unit tests only
+- `e2e_gherkin`: Covered by Gherkin scenarios with Playwright automation (TDD requirement for user-facing stories)
 
 ### 4. Gap Identification
 
@@ -69,6 +79,13 @@ Document any gaps found:
 
 ```yaml
 coverage_gaps:
+  - requirement: 'AC1: User can login with valid credentials'
+    gap: 'No Gherkin scenarios for user-facing functionality'
+    severity: high
+    suggested_test:
+      type: e2e_gherkin
+      description: 'Create feature file with comprehensive scenarios (happy/unhappy/edge/security)'
+
   - requirement: 'AC3: Password reset email sent within 60 seconds'
     gap: 'No test for email delivery timing'
     severity: medium

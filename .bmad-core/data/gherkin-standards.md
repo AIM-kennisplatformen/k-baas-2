@@ -8,7 +8,7 @@ Project standards and conventions for writing Gherkin feature files and scenario
 
 ### Directory Structure
 ```
-features/
+tests/features/
 ├── epic1/
 │   ├── user-authentication.feature
 │   └── user-profile.feature

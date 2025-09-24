@@ -56,6 +56,34 @@ sections:
     owner: scrum-master
     editors: [scrum-master]
 
+  - id: tasks-subtasks
+    title: Tasks / Subtasks
+    type: bullet-list
+    instruction: |
+      Break down the story into specific tasks and subtasks needed for implementation.
+      Reference applicable acceptance criteria numbers where relevant.
+      
+      NOTE: In GitHub issues workflow, main tasks will be created as sub-issues.
+      Use this section for task descriptions that will become issue titles and bodies.
+    template: |
+      - Task 1: [Brief title] (AC: # if applicable)
+        - Description: [Detailed task description for sub-issue body]
+        - Subtask1.1...
+      - Task 2: [Brief title] (AC: # if applicable)
+        - Description: [Detailed task description for sub-issue body]
+        - Subtask 2.1...
+      - Task 3: [Brief title] (AC: # if applicable)
+        - Description: [Detailed task description for sub-issue body]
+        - Subtask 3.1...
+    elicit: true
+    owner: scrum-master
+    editors: [scrum-master, dev-agent]
+    post_process: |
+      For each main task, create sub-issue using:
+      github-issue-manager.sh create-task {{story_num}} "{{task_title}}" "{{task_description}}" "{{epic_slug}}" "{{story_slug}}"
+      slug-creation-rules: derive from task_title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 30 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), omit stop words (e.g., "the", "and", "of")
+      
+
   - id: gherkin-scenarios
     title: Gherkin Scenarios
     type: text
@@ -69,7 +97,7 @@ sections:
       This section is populated by QA Agent using create-feature-files task.
       All user-observable acceptance criteria MUST have corresponding Gherkin scenarios.
     template: |
-      **Feature File:** `features/{epic_slug}/{story_slug}.feature`
+      **Feature File:** `tests/features/{epic_slug}/{story_slug}.feature`
       
       **Status:** 🟡 Pending creation (use `*feature-files {story}` command)
       
@@ -109,34 +137,6 @@ sections:
       **Implementation Notes:** [Updated by Dev Agent during implementation]
     owner: qa-agent
     editors: [qa-agent, dev-agent]
-
-  - id: tasks-subtasks
-    title: Tasks / Subtasks
-    type: bullet-list
-    instruction: |
-      Break down the story into specific tasks and subtasks needed for implementation.
-      Reference applicable acceptance criteria numbers where relevant.
-      
-      NOTE: In GitHub issues workflow, main tasks will be created as sub-issues.
-      Use this section for task descriptions that will become issue titles and bodies.
-    template: |
-      - Task 1: [Brief title] (AC: # if applicable)
-        - Description: [Detailed task description for sub-issue body]
-        - Subtask1.1...
-      - Task 2: [Brief title] (AC: # if applicable)
-        - Description: [Detailed task description for sub-issue body]
-        - Subtask 2.1...
-      - Task 3: [Brief title] (AC: # if applicable)
-        - Description: [Detailed task description for sub-issue body]
-        - Subtask 3.1...
-    elicit: true
-    owner: scrum-master
-    editors: [scrum-master, dev-agent]
-    post_process: |
-      For each main task, create sub-issue using:
-      github-issue-manager.sh create-task {{story_num}} "{{task_title}}" "{{task_description}}" "{{epic_slug}}" "{{story_slug}}"
-      slug-creation-rules: derive from task_title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 30 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), omit stop words (e.g., "the", "and", "of")
-      
 
   - id: dev-notes
     title: Dev Notes

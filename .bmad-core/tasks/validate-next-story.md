@@ -62,6 +62,10 @@ To comprehensively validate a story draft before implementation begins, ensuring
 - **Validation steps**: Are acceptance criteria validation steps clear?
 - **Testing tools/frameworks**: Are required testing tools specified?
 - **Test data requirements**: Are test data needs identified?
+- **TDD/Gherkin Requirements**: For user-facing stories, are Gherkin scenario requirements clearly noted?
+- **Feature file planning**: Are feature file paths and coverage requirements specified?
+- **Step definition status**: Is step definition creation and implementation status tracked?</search>
+</search_and_replace>
 
 ### 6. Security Considerations Assessment (if applicable)
 
@@ -116,6 +120,7 @@ Provide a structured validation report and add it as a comment to the story issu
 - Incomplete acceptance criteria coverage
 - Missing required sections
 - Missing or improperly linked task sub-issues
+- **TDD Requirement**: User-facing stories missing Gherkin Scenarios section or Step Definitions Status section
 
 #### Should-Fix Issues (Important Quality Improvements)
 
