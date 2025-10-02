@@ -44,24 +44,91 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 
 **Epic Goal:** Establish the foundational infrastructure, repository setup, and core application framework to enable efficient development of subsequent features.
 
-### Story 1.1: Repository Setup
-**As a developer, I want a properly configured repository with both frontend and backend projects so that I can efficiently develop and test the application.**
+### Story 1.1: Repository Structure Setup
+**As a developer, I want a well-organized repository structure so that I can efficiently navigate and manage the codebase.**
 
 #### Acceptance Criteria:
-- Repository is organized with appropriate project structure
-- JavaScript is configured for frontend development
-- Python is configured for backend development
-- Linting and formatting rules are established and working
-- Basic CI/CD with GitHub Actions is functional
+- Root directory structure follows monorepo best practices
+- Frontend and backend projects are properly separated
+- Documentation folders are organized logically
+- Configuration files are placed appropriately
+- .gitignore files prevent unwanted files from being committed
 
 #### Deliverables:
-- Configured repository structure
-- Frontend project structure (React 19 + JavaScript)
-- Backend project structure (Python 3.14 + FastAPI)
-- CI/CD pipeline configuration
-- Development environment documentation
+- Root directory structure
+- Project organization documentation
+- .gitignore configuration
+- Folder structure guidelines
 
-### Story 1.2: Frontend Application Shell
+### Story 1.2: Frontend Development Environment Setup
+**As a frontend developer, I want a configured JavaScript development environment so that I can start building React components efficiently.**
+
+#### Acceptance Criteria:
+- Node.js and npm/yarn are properly configured
+- Package.json includes necessary frontend dependencies
+- Development scripts are functional (start, build, test)
+- Environment variables system is established
+- Frontend project builds successfully
+
+#### Deliverables:
+- Frontend project initialization
+- Package.json configuration
+- Development scripts setup
+- Environment configuration template
+- Build verification
+
+### Story 1.3: Backend Development Environment Setup
+**As a backend developer, I want a configured Python development environment so that I can start building FastAPI services efficiently.**
+
+#### Acceptance Criteria:
+- Python 3.14 virtual environment is configured
+- Requirements.txt includes necessary backend dependencies
+- Development scripts are functional (start, test, migrate)
+- Environment variables system is established
+- Backend API starts successfully
+
+#### Deliverables:
+- Python virtual environment setup
+- Requirements.txt configuration
+- Development scripts setup
+- Environment configuration template
+- API startup verification
+
+### Story 1.4: Code Quality Tools Configuration
+**As a developer, I want automated code quality tools so that I can maintain consistent code standards across the project.**
+
+#### Acceptance Criteria:
+- ESLint and Prettier are configured for frontend code
+- Black, flake8, and mypy are configured for backend code
+- Pre-commit hooks enforce code quality automatically
+- Code formatting rules are consistent across the team
+- Quality tools integration works in IDEs
+
+#### Deliverables:
+- ESLint and Prettier configuration
+- Python linting tools configuration
+- Pre-commit hooks setup
+- IDE integration guidelines
+- Code quality documentation
+
+### Story 1.5: CI/CD Pipeline Setup
+**As a developer, I want automated CI/CD pipelines so that code changes are validated and deployed consistently.**
+
+#### Acceptance Criteria:
+- GitHub Actions workflows are configured for testing
+- Frontend and backend tests run automatically on PRs
+- Build processes are automated and verified
+- Deployment pipeline foundation is established
+- Pipeline status is clearly visible in GitHub
+
+#### Deliverables:
+- GitHub Actions workflow files
+- Automated testing pipeline
+- Build automation
+- Deployment pipeline foundation
+- Pipeline documentation
+
+### Story 1.6: Frontend Application Shell
 **As a developer, I want a basic frontend application shell with React 19, Tailwind 4, and Shadcn/ui so that I can start building UI components.**
 
 #### Acceptance Criteria:
@@ -78,7 +145,7 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - Jotai state management setup
 - Theme system foundation
 
-### Story 1.3: Backend API Foundation
+### Story 1.7: Backend API Foundation
 **As a developer, I want a basic backend API with FastAPI so that I can start implementing data storage and retrieval.**
 
 #### Acceptance Criteria:
@@ -95,7 +162,7 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - API health check endpoints
 - Security configuration
 
-### Story 1.4: Real-time Communication Setup
+### Story 1.8: Real-time Communication Setup
 **As a developer, I want Socket.io integration between frontend and backend so that I can implement real-time collaboration features.**
 
 #### Acceptance Criteria:
@@ -859,7 +926,7 @@ This document provides a comprehensive breakdown of all user stories, acceptance
 
 **Total Coverage:**
 - 12 Epics (including new Epic 0.5 for Core Interface and Epic 12 for User Experience)
-- 50 User Stories (16 new stories added to address gaps from PRD analysis)
+- 54 User Stories (20 new stories added to address gaps from PRD analysis)
 - Comprehensive acceptance criteria for each story
 - User-facing deliverables aligned with MVP and post-MVP requirements
 - Complete coverage of viewer/analyst user journey
@@ -867,7 +934,7 @@ This document provides a comprehensive breakdown of all user stories, acceptance
 
 **Epic Breakdown:**
 - Epic 0.5: Core Interface & Synchronization (2 stories)
-- Epic 1: Project Foundation & Infrastructure (4 stories) 
+- Epic 1: Project Foundation & Infrastructure (8 stories) 
 - Epic 2: User Authentication & Management (5 stories)
 - Epic 3: Knowledge Base Creation & Schema Management (4 stories)
 - Epic 4: Wiki Content Management (4 stories)
@@ -881,8 +948,8 @@ This document provides a comprehensive breakdown of all user stories, acceptance
 - Epic 12: User Experience & Accessibility (8 stories)
 
 **Version Distribution:**
-- V0.7 (MVP): 17 stories
-- V1: 26 stories  
+- V0.7 (MVP): 21 stories
+- V1: 26 stories
 - V2: 5 stories
 - V3: 2 stories
 
