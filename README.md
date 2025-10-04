@@ -6,10 +6,10 @@ Dit project ontwikkelt een intuïtief platform waarmee domeinexperts zonder tech
 
 ### Visie en Doelen
 
-**Visie:** Een intuïtief, collaboratief platform creëren dat domeinexperts in staat stelt om onderling verbonden kennis te bouwen zonder technische expertise.
+**Visie:** Een toegankelijk, collaboratief platform creëren dat domeinexperts in staat stelt om onderling verbonden kennis te bouwen zonder technische expertise.
 
 **Primaire Doelen:**
-- Ontwikkel een intuïtieve interface voor niet-technische gebruikers om wiki-content en kennisgrafelementen te maken en bewerken
+- Ontwikkel een intuïtieve interface voor niet-technische gebruikers om wiki-content en kennisgraafelementen te maken en bewerken
 - Implementeer bidirectionele synchronisatie tussen wiki-content en kennisgraafvisualisatie
 - Integreer AI-assistentie voor relatie-suggesties, samenvattingen en het identificeren van kennisgaten
 - Real-time collaboratie voor teams die werken aan gedeelde kennisbases
@@ -34,7 +34,7 @@ De primaire gebruikers zijn domeinexperts met gespecialiseerde kennis maar beper
 
 - **Backend:** TypeDB als kennisgraaf database
 - **API Framework:** FastAPI (Python)
-- **Frontend:** React 19 met Nx monorepo
+- **Frontend:** React 19 (met Vite)
 - **Rich Text Editor:** Lexical
 - **Graph Visualization:** React Flow
 - **Real-time Communication:** Socket.IO
@@ -43,10 +43,9 @@ De primaire gebruikers zijn domeinexperts met gespecialiseerde kennis maar beper
 
 Voor gedetailleerde informatie, raadpleeg de volgende documenten:
 
-- [Project Brief](knowledge-graph-wiki-project-brief.md) - Volledige projectbeschrijving
-- [User-stories en Acceptatiecriteria](User-Stories-Acceptance-Criteria-Deliverables.md) - Functionele vereisten
-- [Architectuur Documentatie](architecture/) - Technische architectuur en implementatie
 - [PRD Documentatie](prd/) - Product Requirements Document
+- [Architectuur Documentatie](architecture/) - Technische architectuur en implementatie
+- [Project Brief](knowledge-graph-wiki-project-brief.md) - Volledige projectbeschrijving
 
 ## Ontwikkelproces
 
