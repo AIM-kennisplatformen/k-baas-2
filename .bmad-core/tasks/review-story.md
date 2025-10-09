@@ -91,7 +91,7 @@ required:
 - Run tests to ensure changes don't break functionality
 - Document all changes in QA Results section with clear WHY and HOW
 - Do NOT alter story content beyond QA Results section
-- Do NOT change story Status or File List; recommend next status only
+- Do NOT change story GitHub issue status or File List; recommend next status only
 
 ### 4. Standards Compliance Check
 
@@ -147,9 +147,10 @@ After review and any refactoring, add your results as a comment to the story iss
 - Testing Strategy: [✓/✗] [notes if any]
 - All ACs Met: [✓/✗] [notes if any]
 - **TDD/Gherkin Requirements**: [✓/✗] [notes if any]
-  - Feature files exist for user-facing ACs: [✓/✗]
-  - Step definitions implemented: [✓/✗]
-  - All scenarios passing: [✓/✗]
+  - Feature files exist for user-facing ACs: [✓/✗] [N/A for infrastructure stories]
+  - Step definitions implemented: [✓/✗] [N/A for infrastructure stories]
+  - All scenarios passing: [✓/✗] [N/A for infrastructure stories]
+  - **Infrastructure Exemption**: [✓/✗] Story is development infrastructure (exempt from TDD requirements)
 
 ### Improvements Checklist
 
@@ -319,6 +320,15 @@ Stop the review and request clarification if:
 - **Any Gherkin scenarios are failing for user-facing functionality**
 - Code changes don't align with story requirements
 - Critical architectural issues that require discussion
+
+**EXEMPTION FOR DEVELOPMENT INFRASTRUCTURE**:
+Development infrastructure stories (CI/CD, build tools, development environment setup, project scaffolding) are exempt from Gherkin/feature file requirements. Focus review on functional verification of infrastructure components.
+
+**SUBTASK DESCRIPTION GUIDANCE**:
+If task descriptions appear missing from the story issue, reviewers must read the linked subtask issues to find detailed task descriptions. Story issues should only contain task titles with links to subtask issues after subtask creation.
+
+**EXEMPTION FOR DEVELOPMENT INFRASTRUCTURE**:
+Development infrastructure stories (CI/CD, build tools, development environment setup, project scaffolding) are exempt from Gherkin/feature file requirements. Focus review on functional verification of infrastructure components.
 
 ## Completion
 

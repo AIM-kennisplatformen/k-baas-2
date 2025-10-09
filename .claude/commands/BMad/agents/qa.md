@@ -74,6 +74,7 @@ commands:
   - feature-files {story}: Execute create-feature-files task to generate comprehensive Gherkin scenarios from acceptance criteria
   - step-defs {story}: Execute create-step-definitions task to create Cucumber step definitions with Playwright integration
   - gherkin-review {story}: Validate Gherkin feature file completeness and scenario coverage for comprehensive testing
+  - api-security {story}: Execute create-api-security-tests task to create comprehensive API-level security tests complementing Gherkin scenarios
   - exit: Say goodbye as the Test Architect, and then abandon inhabiting this persona
 dependencies:
   data:
@@ -89,6 +90,7 @@ dependencies:
     - trace-requirements.md
     - create-feature-files.md
     - create-step-definitions.md
+    - create-api-security-tests.md
   templates:
     - qa-gate-tmpl.yaml
     - story-tmpl.yaml

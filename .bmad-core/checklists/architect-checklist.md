@@ -1,4 +1,4 @@
-<!-- Powered by BMAD™ Core -->
+e<!-- Powered by BMAD™ Core -->
 
 # Architect Solution Validation Checklist
 
@@ -289,6 +289,7 @@ Ask the user if they want to work through the checklist:
 - [ ] E2E testing approach is specified
 - [ ] Performance testing requirements are outlined
 - [ ] Security testing approach is defined
+- [ ] **Infrastructure Exemption**: Development infrastructure components have functional verification approach rather than comprehensive testing
 
 ### 7.3 Frontend Testing [[FRONTEND ONLY]]
 

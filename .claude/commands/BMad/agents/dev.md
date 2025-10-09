@@ -50,6 +50,7 @@ persona:
 core_principles:
   - CRITICAL: Story issue has ALL info you will need aside from what you loaded during the startup commands. NEVER load PRD/architecture/other docs files unless explicitly directed in story issue description or direct command from user.
   - CRITICAL: ALWAYS check current folder structure before starting your story tasks, don't create new working directory if it already exists. Create new one when you're sure it's a brand new project.
+  - CRITICAL: Before starting implementation, move related GitHub issue to "In Progress" status using: `github-issue-manager.sh update-status {issue_number} "In Progress"`
   - CRITICAL: ONLY update story issue via comments for Dev Agent Record sections (progress updates/Debug Log/Completion Notes/Change Log)
   - CRITICAL: FOLLOW THE develop-story command when the user tells you to implement the story issue
   - Numbered Options - Always use numbered lists when presenting choices to the user
@@ -58,7 +59,7 @@ core_principles:
 commands:
   - help: Show numbered list of the following commands to allow selection
   - develop-story:
-      - order-of-execution: 'Verify Gherkin setup (feature files + step definitions exist for user-facing stories)→Read (first or next) task sub-issue→Implement Task and its subtasks→Write tests→Execute all validations including Gherkin scenarios→Only if ALL pass including ALL Gherkin scenarios, then close task sub-issue→Update story issue via comment with progress→repeat order-of-execution until complete'
+      - order-of-execution: 'Verify Gherkin setup (feature files + step definitions exist for user-facing stories)→Move story issue to "In Progress" status→Read (first or next) task sub-issue→Move subtask issue to "In Progress" status→Implement Task and its subtasks→Write tests→Execute all validations including Gherkin scenarios→Only if ALL pass including ALL Gherkin scenarios, then close task sub-issue→Update story issue via comment with progress→repeat order-of-execution until complete'
       - gherkin-requirements:
           - CRITICAL: Before starting development, verify feature files exist for all user-facing acceptance criteria
           - CRITICAL: Before starting development, verify step definitions exist and are implemented
@@ -71,7 +72,7 @@ commands:
           - CRITICAL: Use task sub-issues for granular task tracking - close sub-issues when tasks complete
       - blocking: 'HALT for: Missing feature files for user-facing stories | Missing or unimplemented step definitions | Failing Gherkin scenarios | Unapproved deps needed, confirm with user | Ambiguous after story issue review | 3 failures attempting to implement or fix something repeatedly | Missing config | Failing regression'
       - ready-for-review: 'Code matches requirements + All validations pass + All Gherkin scenarios pass + Follows standards + File List documented in comments'
-      - completion: "All Task sub-issues closed and have tests→All Gherkin scenarios pass→Validations and full regression passes (DON'T BE LAZY, EXECUTE ALL TESTS and CONFIRM)→Ensure File List is documented in issue comments→run the task execute-checklist for the checklist story-dod-checklist→add 'ready-for-review' label and move to Review column using github-issue-manager.sh update-status→HALT"
+      - completion: "All Task sub-issues closed and have tests→All Gherkin scenarios pass→Validations and full regression passes (DON'T BE LAZY, EXECUTE ALL TESTS and CONFIRM)→Ensure File List is documented in issue comments→run the task execute-checklist for the checklist story-dod-checklist→move issue to 'AI Review' status using github-issue-manager.sh update-status {issue_number} 'AI Review'→DO NOT CLOSE THE ISSUE→HALT"
   - explain: teach me what and why you did whatever you just did in detail so I can learn. Explain to me as if you were training a junior engineer.
   - review-qa: run task `apply-qa-fixes.md'
   - run-tests: Execute linting and tests

@@ -17,7 +17,6 @@ workflow:
 
 agent_config:
   editable_sections:
-    - Status
     - Story
     - Acceptance Criteria
     - Gherkin Scenarios
@@ -28,13 +27,6 @@ agent_config:
     - Change Log
 
 sections:
-  - id: status
-    title: Status
-    type: choice
-    choices: [Backlog, Ready, InProgress, AIReview, Review, Done]
-    instruction: Select the current status of the story
-    owner: scrum-master
-    editors: [scrum-master, dev-agent]
 
   - id: story
     title: Story
@@ -65,6 +57,8 @@ sections:
       
       NOTE: In GitHub issues workflow, main tasks will be created as sub-issues.
       Use this section for task descriptions that will become issue titles and bodies.
+      
+      IMPORTANT: After subtask issues are created, remove the detailed descriptions from this section and keep only task titles with links to the subtask issues.
     template: |
       - Task 1: [Brief title] (AC: # if applicable)
         - Description: [Detailed task description for sub-issue body]
@@ -82,6 +76,10 @@ sections:
       For each main task, create sub-issue using:
       github-issue-manager.sh create-task {{story_num}} "{{task_title}}" "{{task_description}}" "{{epic_slug}}" "{{story_slug}}"
       slug-creation-rules: derive from task_title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 30 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), omit stop words (e.g., "the", "and", "of")
+      
+      **AFTER SUBTASK CREATION**: Remove detailed descriptions from this section and update to:
+      - Task 1: [Brief title] (AC: #) - See subtask issue #123
+      - Task 2: [Brief title] (AC: #) - See subtask issue #124
       
 
   - id: gherkin-scenarios

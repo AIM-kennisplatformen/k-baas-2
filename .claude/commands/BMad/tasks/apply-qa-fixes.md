@@ -41,6 +41,9 @@ optional:
   - `deno lint`
   - `deno test -A`
 
+**EXEMPTION FOR DEVELOPMENT INFRASTRUCTURE**:
+If this story is primarily for development infrastructure setup (CI/CD, build tools, development environment, project scaffolding), automated testing requirements are waived. Focus on verifying the infrastructure works functionally rather than test coverage.
+
 ## Process (Do not skip steps)
 
 ### 0) Load Core Config & Locate Story Issue
@@ -82,13 +85,18 @@ Guidance:
 
 - Implement code fixes per plan
 - Add missing tests to close coverage gaps (unit first; integration where required by AC)
+- **TDD Requirement**: For user-facing stories, implement and update Gherkin step definitions to ensure all scenarios pass
+- **TDD Requirement**: Execute Cucumber tests and fix any failing Gherkin scenarios
 - Keep imports centralized via `deps.ts` (see `docs/project/typescript-rules.md`)
-- Follow DI boundaries in `src/core/di.ts` and existing patterns
+- Follow DI boundaries in `src/core/di.ts` and existing patterns</search>
+</search_and_replace>
 
 ### 4) Validate
 
 - Run `deno lint` and fix issues
 - Run `deno test -A` until all tests pass
+- **TDD Requirement**: Run Cucumber tests to ensure all Gherkin scenarios pass
+- **TDD Requirement**: Verify step definitions are fully implemented and executing correctly
 - Iterate until clean
 
 ### 5) Update Story Issue (Via Comments ONLY)

@@ -13,6 +13,8 @@ Generate a standalone quality gate file that provides a clear pass/fail decision
 - Story has been reviewed (manually or via review-story task)
 - Review findings are available
 - Understanding of story requirements and implementation
+- **TDD Requirement**: For user-facing stories, Gherkin scenarios must be validated (existing, implemented, passing)
+- **Infrastructure Exemption**: Development infrastructure stories are exempt from TDD/Gherkin requirements
 
 ## Gate File Location
 
@@ -52,6 +54,10 @@ top_issues:
     severity: high # ONLY: low|medium|high
     finding: 'No rate limiting on login endpoint'
     suggested_action: 'Add rate limiting middleware before production'
+  - id: 'TDD-001'
+    severity: high
+    finding: 'User-facing story missing required Gherkin scenarios'
+    suggested_action: 'Create feature file with comprehensive scenario coverage before proceeding'
   - id: 'TEST-001'
     severity: medium
     finding: 'No integration tests for auth flow'
@@ -85,7 +91,8 @@ waiver:
 
 - All acceptance criteria met
 - No high-severity issues
-- Test coverage meets project standards
+- Test coverage meets project standards (exempt for infrastructure stories)
+- **TDD Requirement**: For user-facing stories, all Gherkin scenarios exist, are implemented, and passing
 
 ### CONCERNS
 
@@ -97,6 +104,7 @@ waiver:
 
 - Acceptance criteria not met
 - High-severity issues present
+- **TDD Requirement**: User-facing stories missing required Gherkin scenarios or scenarios failing (exempt for infrastructure stories)
 - Recommend return to InProgress
 
 ### WAIVED
@@ -119,6 +127,7 @@ waiver:
 - `PERF-`: Performance issues
 - `REL-`: Reliability issues
 - `TEST-`: Testing gaps
+- `TDD-`: Gherkin/BDD scenario issues
 - `MNT-`: Maintainability concerns
 - `ARCH-`: Architecture issues
 - `DOC-`: Documentation gaps
@@ -159,9 +168,11 @@ After creating gate file, add comment to story issue:
 - Security: Rate limiting missing on auth endpoints
 - Performance: Response times within acceptable range
 - Testing: Integration test coverage needs improvement
+- **TDD/Gherkin**: Missing feature files for user-facing functionality
 
 ### Recommendations
 - Add rate limiting middleware before production
+- Create comprehensive Gherkin scenarios for all user-observable acceptance criteria
 - Implement additional integration tests for auth flow
 ```
 

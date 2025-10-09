@@ -11,7 +11,7 @@ Guide for prioritizing test scenarios based on risk, criticality, and business i
 ### Mandatory Gherkin Requirements
 - **EVERY user-story with user-observable consequences MUST have comprehensive Gherkin scenarios**
 - **This requirement applies regardless of P0/P1/P2/P3 priority classification**
-- **No story can reach "Review" status without ALL Gherkin scenarios passing**
+- **No story can reach "Review" GitHub issue status without ALL Gherkin scenarios passing**
 
 ### Comprehensive Scenario Coverage Required
 All user-facing stories MUST include Gherkin scenarios for:

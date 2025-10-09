@@ -37,6 +37,7 @@ To comprehensively validate a story draft before implementation begins, ensuring
 - **File creation sequence**: Do tasks specify where files should be created in logical order?
 - **Path accuracy**: Are file paths consistent with project structure from architecture docs?
 - **Task sub-issues**: Check if task sub-issues exist and are properly linked
+- **Subtask description location**: Verify that detailed task descriptions are in subtask issues, not in the story issue body
 
 ### 3. UI/Frontend Completeness Validation (if applicable)
 
@@ -62,6 +63,10 @@ To comprehensively validate a story draft before implementation begins, ensuring
 - **Validation steps**: Are acceptance criteria validation steps clear?
 - **Testing tools/frameworks**: Are required testing tools specified?
 - **Test data requirements**: Are test data needs identified?
+- **TDD/Gherkin Requirements**: For user-facing stories, are Gherkin scenario requirements clearly noted?
+- **Feature file planning**: Are feature file paths and coverage requirements specified?
+- **Step definition status**: Is step definition creation and implementation status tracked?</search>
+</search_and_replace>
 
 ### 6. Security Considerations Assessment (if applicable)
 
@@ -116,6 +121,8 @@ Provide a structured validation report and add it as a comment to the story issu
 - Incomplete acceptance criteria coverage
 - Missing required sections
 - Missing or improperly linked task sub-issues
+- **TDD Requirement**: User-facing stories missing Gherkin Scenarios section or Step Definitions Status section
+- **Subtask Description Issue**: Task descriptions remaining in story issue after subtask creation (should be moved to subtask issues)
 
 #### Should-Fix Issues (Important Quality Improvements)
 
@@ -150,4 +157,12 @@ Provide a structured validation report and add it as a comment to the story issu
 #### Issue Status Recommendation
 
 - If GO: Add "validated" label and move to "Ready" column using `github-issue-manager.sh update-status {issue_number} "Ready"`
-- If NO-GO: Add "validation-failed" label and keep in current status for fixes
+- If NO-GO: Add "validation-failed" label and keep in current GitHub issue status for fixes
+
+**PO Agent Approval Action**: When the PO agent approves a user story, the agent should:
+1. Update the GitHub issue status to "Ready" using: `github-issue-manager.sh update-status {issue_number} "Ready"`
+2. **IMPORTANT**: Also move all subtask issues to "Ready" status using: `github-issue-manager.sh update-status {subtask_issue_number} "Ready"` for each subtask
+
+**Subtask Status Requirement**: When a user-story issue is moved to "Ready", all its subtasks must also be moved to "Ready" to ensure the entire work package is ready for development.
+
+**Subtask Description Management**: After subtask issues are created, detailed task descriptions must be removed from the story issue body. Story issues should only contain task titles with links to subtask issues. Reviewing agents must read subtask issues for detailed task descriptions and should not complain about missing descriptions in the story issue.

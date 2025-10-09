@@ -14,6 +14,7 @@ Generate a standalone quality gate file that provides a clear pass/fail decision
 - Review findings are available
 - Understanding of story requirements and implementation
 - **TDD Requirement**: For user-facing stories, Gherkin scenarios must be validated (existing, implemented, passing)
+- **Infrastructure Exemption**: Development infrastructure stories are exempt from TDD/Gherkin requirements
 
 ## Gate File Location
 
@@ -90,7 +91,7 @@ waiver:
 
 - All acceptance criteria met
 - No high-severity issues
-- Test coverage meets project standards
+- Test coverage meets project standards (exempt for infrastructure stories)
 - **TDD Requirement**: For user-facing stories, all Gherkin scenarios exist, are implemented, and passing
 
 ### CONCERNS
@@ -103,7 +104,7 @@ waiver:
 
 - Acceptance criteria not met
 - High-severity issues present
-- **TDD Requirement**: User-facing stories missing required Gherkin scenarios or scenarios failing
+- **TDD Requirement**: User-facing stories missing required Gherkin scenarios or scenarios failing (exempt for infrastructure stories)
 - Recommend return to InProgress
 
 ### WAIVED

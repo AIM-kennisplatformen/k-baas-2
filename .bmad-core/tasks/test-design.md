@@ -94,10 +94,10 @@ test_scenario:
 
 Ensure:
 
-- Every AC with user-observable consequences has Gherkin scenarios
-- Every AC has appropriate test coverage (prioritizing Gherkin for user-facing functionality)
+- Every AC with user-observable consequences has Gherkin scenarios (except infrastructure stories)
+- Every AC has appropriate test coverage (prioritizing Gherkin for user-facing functionality, functional tests for infrastructure)
 - Traditional E2E/integration tests don't duplicate Gherkin scenario coverage
-- Security issues have both Gherkin scenarios AND API-level tests
+- Security issues have both Gherkin scenarios AND API-level tests (except for infrastructure setup)
 - Critical paths have multiple levels where needed
 - Risk mitigations are addressed
 
@@ -196,20 +196,22 @@ gh issue comment {story_issue_number} --body "## Test Design Complete
 
 Before finalizing, verify:
 
-- [ ] Every AC with user-observable consequences has Gherkin scenarios
+- [ ] Every AC with user-observable consequences has Gherkin scenarios (exempt for infrastructure stories)
 - [ ] Traditional E2E/integration tests don't duplicate Gherkin coverage
-- [ ] Security issues have both Gherkin scenarios AND API-level tests
+- [ ] Security issues have both Gherkin scenarios AND API-level tests (exempt for infrastructure setup)
 - [ ] Test levels are appropriate (not over-testing)
 - [ ] Priorities align with business risk
 - [ ] Test IDs follow naming convention
 - [ ] Scenarios are atomic and independent
 - [ ] Security scenarios included in Gherkin for user inputs
+- [ ] Infrastructure stories focus on functional verification rather than comprehensive test coverage
 
 ## Key Principles
 
 - **Gherkin First**: ALL user-facing functionality requires Gherkin scenarios (overrides priority)
+- **Infrastructure Exemption**: Development infrastructure stories focus on functional verification, not comprehensive test coverage
 - **Efficient coverage**: Gherkin scenarios can replace traditional E2E/integration for user-facing ACs
-- **Security Exception**: Security issues require both Gherkin scenarios AND API-level tests
+- **Security Exception**: Security issues require both Gherkin scenarios AND API-level tests (except infrastructure setup)
 - **Shift left**: Prefer unit tests for business logic, Gherkin for user interactions
 - **Risk-based**: Focus on what could go wrong
 - **Maintainability**: Consider long-term test maintenance

@@ -9,7 +9,7 @@ Create Cucumber step definitions for Gherkin feature files using Playwright for 
 ```yaml
 required:
   - story_issue_number: GitHub issue number for the story (e.g., 42)
-  - feature_file_path: Path to the Gherkin feature file (e.g., features/epic1/user-auth.feature)
+  - feature_file_path: Path to the Gherkin feature file (e.g., tests/features/epic1/user-auth.feature)
 
 optional:
   - tech_stack: from `.bmad-core/core-config.yaml` key `techStack`

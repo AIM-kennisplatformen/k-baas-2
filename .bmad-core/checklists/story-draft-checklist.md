@@ -108,12 +108,14 @@ Note: We don't need every file listed - just the important ones.]]
 2. Key test scenarios are listed
 3. Success criteria are measurable
 4. Special test considerations are noted
-5. Acceptance criteria in the story issue are testable]]
+5. Acceptance criteria in the story issue are testable
+6. **Infrastructure Exemption**: Development infrastructure stories focus on functional verification rather than comprehensive testing]]
 
 - [ ] Required testing approach is outlined in issue description
 - [ ] Key test scenarios are identified
 - [ ] Success criteria are defined and measurable
 - [ ] Special testing considerations are noted (if applicable)
+- [ ] For infrastructure stories: Functional verification approach is specified instead of comprehensive test coverage
 
 ## VALIDATION RESULT
 

@@ -267,8 +267,9 @@ You are the "Vibe CEO" - thinking like a CEO with unlimited resources and a sing
 
 1. **Agent Specialization**: Each agent has specific expertise and responsibilities
 2. **Clean Handoffs**: Always start fresh when switching between agents
-3. **Status Tracking**: Maintain story statuses (Draft → Approved → InProgress → Done)
-4. **Iterative Development**: Complete one story before starting the next
+3. **Status Tracking**: Maintain story GitHub issue statuses (Draft → Approved → InProgress → AI Review → Review → Done)
+4. **Issue Lifecycle**: Developers move issues to "AI Review" after implementation, never close issues directly
+5. **Iterative Development**: Complete one story before starting the next
 5. **Documentation First**: Always start with solid PRD and architecture
 
 ## Agent System

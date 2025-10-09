@@ -19,6 +19,7 @@ required:
 - Story issue must have "review" label or be in "Review" column on project board
 - Developer has completed all task sub-issues and updated issue comments with File List
 - All automated tests are passing
+- **TDD Requirement**: For user-facing stories, all Gherkin scenarios must be implemented and passing
 - Use `gh issue view {issue_number}` to verify story details before starting review
 
 ## Review Process - Adaptive Test Architecture
@@ -32,12 +33,16 @@ required:
 - Diff > 500 lines
 - Previous gate was FAIL/CONCERNS
 - Story has > 5 acceptance criteria
+- **User-facing story missing Gherkin scenarios or failing scenarios**
 
 ### 2. Comprehensive Analysis
 
 **A. Requirements Traceability**
 
 - Map each acceptance criteria to its validating tests (document mapping with Given-When-Then, not test code)
+- **CRITICAL**: Verify all user-facing acceptance criteria have corresponding Gherkin scenarios
+- **CRITICAL**: Ensure all Gherkin scenarios are implemented with working step definitions
+- **CRITICAL**: Validate all Gherkin scenarios are passing (happy/unhappy/edge/security paths)
 - Identify coverage gaps
 - Verify all requirements have corresponding test cases
 
@@ -86,7 +91,7 @@ required:
 - Run tests to ensure changes don't break functionality
 - Document all changes in QA Results section with clear WHY and HOW
 - Do NOT alter story content beyond QA Results section
-- Do NOT change story Status or File List; recommend next status only
+- Do NOT change story GitHub issue status or File List; recommend next status only
 
 ### 4. Standards Compliance Check
 
@@ -141,6 +146,11 @@ After review and any refactoring, add your results as a comment to the story iss
 - Project Structure: [✓/✗] [notes if any]
 - Testing Strategy: [✓/✗] [notes if any]
 - All ACs Met: [✓/✗] [notes if any]
+- **TDD/Gherkin Requirements**: [✓/✗] [notes if any]
+  - Feature files exist for user-facing ACs: [✓/✗] [N/A for infrastructure stories]
+  - Step definitions implemented: [✓/✗] [N/A for infrastructure stories]
+  - All scenarios passing: [✓/✗] [N/A for infrastructure stories]
+  - **Infrastructure Exemption**: [✓/✗] Story is development infrastructure (exempt from TDD requirements)
 
 ### Improvements Checklist
 
@@ -306,8 +316,19 @@ Stop the review and request clarification if:
 - Story issue is incomplete or missing critical information in description or comments
 - File List (in issue comments) is empty or clearly incomplete
 - No tests exist when they were required
+- **User-facing story missing required Gherkin feature files or step definitions**
+- **Any Gherkin scenarios are failing for user-facing functionality**
 - Code changes don't align with story requirements
 - Critical architectural issues that require discussion
+
+**EXEMPTION FOR DEVELOPMENT INFRASTRUCTURE**:
+Development infrastructure stories (CI/CD, build tools, development environment setup, project scaffolding) are exempt from Gherkin/feature file requirements. Focus review on functional verification of infrastructure components.
+
+**SUBTASK DESCRIPTION GUIDANCE**:
+If task descriptions appear missing from the story issue, reviewers must read the linked subtask issues to find detailed task descriptions. Story issues should only contain task titles with links to subtask issues after subtask creation.
+
+**EXEMPTION FOR DEVELOPMENT INFRASTRUCTURE**:
+Development infrastructure stories (CI/CD, build tools, development environment setup, project scaffolding) are exempt from Gherkin/feature file requirements. Focus review on functional verification of infrastructure components.
 
 ## Completion
 

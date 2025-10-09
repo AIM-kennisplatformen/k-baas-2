@@ -24,8 +24,8 @@ To identify the next logical story based on project progress and epic definition
 - **List Existing Stories**: Execute `github-issue-manager.sh list-stories "label:story state:all"` to get all story issues
 - Parse story issues to find the highest `{epicNum}.{storyNum}` format in issue titles
 - **If highest story exists:**
-  - Check story issue state and labels to determine status (open/closed, labels like "done", "in-progress", etc.)
-  - If status is not 'Done', alert user: "ALERT: Found incomplete story! Issue: #{issueNum} - {storyTitle} Status: [current status] You should fix this story first, but would you like to accept risk & override to create the next story in draft?"
+  - Check story issue state and labels to determine GitHub issue status (open/closed, labels like "done", "in-progress", etc.)
+  - If GitHub issue status is not 'Done', alert user: "ALERT: Found incomplete story! Issue: #{issueNum} - {storyTitle} GitHub Issue Status: [current status] You should fix this story first, but would you like to accept risk & override to create the next story in draft?"
   - If proceeding, select next sequential story in the current epic
   - If epic is complete, prompt user: "Epic {epicNum} Complete: All stories in Epic {epicNum} have been completed. Would you like to: 1) Begin Epic {epicNum + 1} with story 1 2) Select a specific story to work on 3) Cancel story creation"
   - **CRITICAL**: NEVER automatically skip to another epic. User MUST explicitly instruct which story to create.
@@ -110,56 +110,7 @@ ALWAYS cite source documents: `[Source: architecture/{filename}.md#{section}]`
 
 slug creation rules: derive from title,lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
 
-### 5.5. Generate Gherkin Feature Files (MANDATORY for User-Facing Stories)
 
-**CRITICAL TDD REQUIREMENT**: Before any development work begins, comprehensive Gherkin feature files must be created for all user-observable functionality.
-
-#### 5.5.1 Determine Feature File Requirements
-- Analyze each acceptance criterion to identify user-observable consequences
-- User-observable consequences include: UI changes, API responses users see, notifications, emails, data changes visible to users
-- Infrastructure/refactoring stories without user-observable changes may skip feature file creation
-
-#### 5.5.2 Execute Feature File Creation
-**If story has user-observable acceptance criteria:**
-- Execute create-feature-files task: Load `{root}/tasks/create-feature-files.md` and execute with story issue number
-- This will generate comprehensive Gherkin scenarios covering:
-  - Happy path scenarios (primary user journeys)
-  - Unhappy path scenarios (validation failures, error handling)
-  - Edge case scenarios (boundary conditions, empty inputs)
-  - Security scenarios (malicious input protection)
-
-#### 5.5.3 Execute Step Definition Creation
-**After feature files are created:**
-- Execute create-step-definitions task: Load `{root}/tasks/create-step-definitions.md` and execute with feature file path
-- This will generate Cucumber step definitions with Playwright integration
-- Step definitions provide implementation templates for browser automation
-
-#### 5.5.4 Update Story Issue with Gherkin Status
-- Update the Gherkin Scenarios section in the story issue with:
-  - Feature file location: `features/{epic_slug}/{story_slug}.feature`
-  - Scenario counts created (happy/unhappy/edge/security)
-  - Step definition file locations
-  - Status: "Created - pending implementation"
-
-**Add comment to story issue:**
-```bash
-gh issue comment {story_issue_number} --body "## TDD/Gherkin Setup Complete
-
-**Gherkin Requirements Fulfilled:**
-- ✅ Feature file created: \`features/{epic_slug}/{story_slug}.feature\`
-- ✅ Step definitions created with Playwright integration
-- ✅ Comprehensive scenario coverage: Happy path, unhappy path, edge cases, security
-
-**Development Prerequisites Met:**
-- All user-observable acceptance criteria have Gherkin scenarios
-- Step definitions ready for implementation
-- TDD workflow can begin
-
-**Next Steps:**
-1. Implement step definitions using Playwright
-2. Begin story development only after all scenarios are executable
-3. All scenarios must pass before story can reach 'Review' status"
-```
 
 ### 6. Story Draft Completion and Review
 
@@ -174,12 +125,11 @@ gh issue comment {story_issue_number} --body "## TDD/Gherkin Setup Complete
   - Parent Epic: Issue #{epic_issue_number}
   - Task sub-issues created: [list of task issue numbers]
   - Project Board: Added to Backlog column
-  - **Gherkin/TDD Setup**:
-    - Feature file created: `features/{epic_slug}/{story_slug}.feature` (if user-facing)
-    - Step definitions created with Playwright integration (if user-facing)
-    - Scenario coverage: Happy path, unhappy path, edge cases, security (if user-facing)
-    - TDD prerequisites: ✅ Complete (if user-facing) or ⚪ N/A (infrastructure only)
+  - **TDD Requirements**:
+    - ⚠️ Feature files must be created before development begins (if user-facing)
+    - ⚠️ Step definitions must be implemented before development begins (if user-facing)
+    - Use QA Agent `*feature-files` and `*step-defs` commands after story creation
   - Key technical components included from architecture docs
   - Any deviations or conflicts noted between epic and architecture
   - Checklist Results
-  - Next steps: For Complex stories, suggest the user carefully review the story issue and also optionally have the PO run the task `{root}/tasks/validate-next-story` with the issue number. **For user-facing stories: Development cannot begin until all Gherkin scenarios are executable.**
+  - Next steps: For Complex stories, suggest the user carefully review the story issue and also optionally have the PO run the task `{root}/tasks/validate-next-story` with the issue number. **For user-facing stories: Create feature files using QA Agent `*feature-files` command before beginning development.**

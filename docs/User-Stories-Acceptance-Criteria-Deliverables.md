@@ -44,23 +44,86 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 
 **Epic Goal:** Establish the foundational infrastructure, repository setup, and core application framework to enable efficient development of subsequent features.
 
-### Story 1.1: Repository Structure Setup
-**As a developer, I want a well-organized repository structure so that I can efficiently navigate and manage the codebase.**
+### Story 1.1: Monorepo Root Structure Setup
+**As a developer, I want a clean monorepo root structure so that I can immediately understand the project organization.**
 
 #### Acceptance Criteria:
-- Root directory structure follows monorepo best practices
-- Frontend and backend projects are properly separated
-- Documentation folders are organized logically
-- Configuration files are placed appropriately
-- .gitignore files prevent unwanted files from being committed
+- Root directory contains clearly named top-level folders: `frontend/`, `backend/`, `docs/`, `scripts/`
+- Package.json exists at root level for workspace management
+- README.md exists at root level with project overview
+- Root level contains no loose files except essential configuration
+- Directory structure follows Nx monorepo conventions
 
 #### Deliverables:
-- Root directory structure
-- Project organization documentation
-- .gitignore configuration
-- Folder structure guidelines
+- Root directory structure with named folders
+- Root-level package.json for workspace management
+- Root-level README.md with project overview
 
-### Story 1.2: Frontend Development Environment Setup
+### Story 1.2: Frontend/Backend Project Separation
+**As a developer, I want clearly separated frontend and backend projects so that I can work on each independently.**
+
+#### Acceptance Criteria:
+- Frontend project is isolated in `frontend/` directory with its own package.json
+- Backend project is isolated in `backend/` directory with its own requirements.txt
+- Each project can be built and run independently
+- Cross-project dependencies are clearly documented
+- Build scripts don't interfere between projects
+
+#### Deliverables:
+- Independent frontend project structure in `frontend/`
+- Independent backend project structure in `backend/`
+- Project-specific dependency files
+- Independent build capabilities
+
+### Story 1.3: Documentation Organization Structure
+**As a developer, I want logically organized documentation so that I can quickly find relevant information.**
+
+#### Acceptance Criteria:
+- `docs/` directory contains subdirectories: `architecture/`, `prd/`, `qa/`
+- Each documentation category has its own dedicated subdirectory
+- Documentation follows consistent naming conventions
+- Index files exist for each documentation category
+- Documentation structure matches project configuration in core-config.yaml
+
+#### Deliverables:
+- Organized `docs/` directory structure
+- Category-specific subdirectories
+- Consistent naming conventions
+- Index files for documentation categories
+
+### Story 1.4: Configuration File Organization
+**As a developer, I want properly placed configuration files so that I can easily manage project settings.**
+
+#### Acceptance Criteria:
+- Root-level configuration files are limited to essential items only
+- Project-specific configs are placed within their respective directories
+- Shared configuration is clearly identified and documented
+- Environment-specific configs have clear naming patterns
+- Configuration file locations follow industry conventions
+
+#### Deliverables:
+- Root-level essential configuration files only
+- Project-specific configuration placement
+- Shared configuration documentation
+- Environment-specific configuration patterns
+
+### Story 1.5: Git Ignore Configuration
+**As a developer, I want comprehensive .gitignore files so that unwanted files are never committed.**
+
+#### Acceptance Criteria:
+- Root .gitignore covers common system and editor files
+- Frontend .gitignore covers Node.js specific patterns (node_modules/, dist/, .env.local)
+- Backend .gitignore covers Python specific patterns (__pycache__/, .venv/, *.pyc)
+- IDE-specific files are ignored (.vscode/, .idea/, *.swp)
+- Environment and secret files are explicitly ignored
+
+#### Deliverables:
+- Root-level .gitignore for system/editor files
+- Frontend-specific .gitignore in frontend/ directory
+- Backend-specific .gitignore in backend/ directory
+- Comprehensive ignore patterns for secrets and generated files
+
+### Story 1.6: Frontend Development Environment Setup
 **As a frontend developer, I want a configured JavaScript development environment so that I can start building React components efficiently.**
 
 #### Acceptance Criteria:
@@ -77,7 +140,7 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - Environment configuration template
 - Build verification
 
-### Story 1.3: Backend Development Environment Setup
+### Story 1.7: Backend Development Environment Setup
 **As a backend developer, I want a configured Python development environment so that I can start building FastAPI services efficiently.**
 
 #### Acceptance Criteria:
@@ -94,7 +157,7 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - Environment configuration template
 - API startup verification
 
-### Story 1.4: Code Quality Tools Configuration
+### Story 1.8: Code Quality Tools Configuration
 **As a developer, I want automated code quality tools so that I can maintain consistent code standards across the project.**
 
 #### Acceptance Criteria:
@@ -111,7 +174,7 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - IDE integration guidelines
 - Code quality documentation
 
-### Story 1.5: CI/CD Pipeline Setup
+### Story 1.9: CI/CD Pipeline Setup
 **As a developer, I want automated CI/CD pipelines so that code changes are validated and deployed consistently.**
 
 #### Acceptance Criteria:
@@ -128,7 +191,7 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - Deployment pipeline foundation
 - Pipeline documentation
 
-### Story 1.6: Frontend Application Shell
+### Story 1.10: Frontend Application Shell
 **As a developer, I want a basic frontend application shell with React 19, Tailwind 4, and Shadcn/ui so that I can start building UI components.**
 
 #### Acceptance Criteria:
@@ -145,7 +208,7 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - Jotai state management setup
 - Theme system foundation
 
-### Story 1.7: Backend API Foundation
+### Story 1.11: Backend API Foundation
 **As a developer, I want a basic backend API with FastAPI so that I can start implementing data storage and retrieval.**
 
 #### Acceptance Criteria:
@@ -162,7 +225,7 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - API health check endpoints
 - Security configuration
 
-### Story 1.8: Real-time Communication Setup
+### Story 1.12: Real-time Communication Setup
 **As a developer, I want Socket.io integration between frontend and backend so that I can implement real-time collaboration features.**
 
 #### Acceptance Criteria:
@@ -926,7 +989,7 @@ This document provides a comprehensive breakdown of all user stories, acceptance
 
 **Total Coverage:**
 - 12 Epics (including new Epic 0.5 for Core Interface and Epic 12 for User Experience)
-- 54 User Stories (20 new stories added to address gaps from PRD analysis)
+- 58 User Stories (24 new stories added to address gaps from PRD analysis and Epic 1 breakdown)
 - Comprehensive acceptance criteria for each story
 - User-facing deliverables aligned with MVP and post-MVP requirements
 - Complete coverage of viewer/analyst user journey
@@ -934,7 +997,7 @@ This document provides a comprehensive breakdown of all user stories, acceptance
 
 **Epic Breakdown:**
 - Epic 0.5: Core Interface & Synchronization (2 stories)
-- Epic 1: Project Foundation & Infrastructure (8 stories) 
+- Epic 1: Project Foundation & Infrastructure (12 stories) 
 - Epic 2: User Authentication & Management (5 stories)
 - Epic 3: Knowledge Base Creation & Schema Management (4 stories)
 - Epic 4: Wiki Content Management (4 stories)

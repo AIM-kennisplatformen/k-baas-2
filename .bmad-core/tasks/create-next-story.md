@@ -24,8 +24,8 @@ To identify the next logical story based on project progress and epic definition
 - **List Existing Stories**: Execute `github-issue-manager.sh list-stories "label:story state:all"` to get all story issues
 - Parse story issues to find the highest `{epicNum}.{storyNum}` format in issue titles
 - **If highest story exists:**
-  - Check story issue state and labels to determine status (open/closed, labels like "done", "in-progress", etc.)
-  - If status is not 'Done', alert user: "ALERT: Found incomplete story! Issue: #{issueNum} - {storyTitle} Status: [current status] You should fix this story first, but would you like to accept risk & override to create the next story in draft?"
+  - Check story issue state and labels to determine GitHub issue status (open/closed, labels like "done", "in-progress", etc.)
+  - If GitHub issue status is not 'Done', alert user: "ALERT: Found incomplete story! Issue: #{issueNum} - {storyTitle} GitHub Issue Status: [current status] You should fix this story first, but would you like to accept risk & override to create the next story in draft?"
   - If proceeding, select next sequential story in the current epic
   - If epic is complete, prompt user: "Epic {epicNum} Complete: All stories in Epic {epicNum} have been completed. Would you like to: 1) Begin Epic {epicNum + 1} with story 1 2) Select a specific story to work on 3) Cancel story creation"
   - **CRITICAL**: NEVER automatically skip to another epic. User MUST explicitly instruct which story to create.

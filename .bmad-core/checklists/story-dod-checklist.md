@@ -4,7 +4,7 @@
 
 ## Instructions for Developer Agent
 
-Before marking a story issue as 'Review' (using project board status or labels), please go through each item in this checklist. Report the status of each item (e.g., [x] Done, [ ] Not Done, [N/A] Not Applicable) and provide brief comments if necessary.
+Before marking a story issue as 'Review' (using GitHub issue status or labels), please go through each item in this checklist. Report the status of each item (e.g., [x] Done, [ ] Not Done, [N/A] Not Applicable) and provide brief comments if necessary.
 
 **Add DoD results as a comment to the story issue using**: `gh issue comment {issue_number} --body "DoD Checklist Results..."`
 
@@ -112,8 +112,9 @@ After completing the checklist:
 5. **CRITICAL**: Confirm ALL Gherkin scenarios pass (mandatory for user-facing stories)
 6. Confirm whether the story is truly ready for review
 
-Add this summary as a comment to the story issue, then update issue status:
-- If ready: `github-issue-manager.sh update-status {issue_number} "Review"` and add "ready-for-review" label
+Add this summary as a comment to the story issue, then update GitHub issue status:
+- If ready: `github-issue-manager.sh update-status {issue_number} "AI Review"` and add "ready-for-review" label
+- **IMPORTANT**: Developer should move issues to "AI Review" status after implementation, NOT close the issue
 - If not ready: Keep current status and add "dev-incomplete" label
 
 **GHERKIN ENFORCEMENT**: Stories with user-observable functionality CANNOT be marked "Review" with failing Gherkin scenarios, regardless of other completion status.

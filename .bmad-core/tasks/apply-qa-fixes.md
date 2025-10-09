@@ -41,6 +41,9 @@ optional:
   - `deno lint`
   - `deno test -A`
 
+**EXEMPTION FOR DEVELOPMENT INFRASTRUCTURE**:
+If this story is primarily for development infrastructure setup (CI/CD, build tools, development environment, project scaffolding), automated testing requirements are waived. Focus on verifying the infrastructure works functionally rather than test coverage.
+
 ## Process (Do not skip steps)
 
 ### 0) Load Core Config & Locate Story Issue

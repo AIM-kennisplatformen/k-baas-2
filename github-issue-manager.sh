@@ -671,9 +671,34 @@ update_issue_status() {
         fi
     fi
     
+    # Get the option ID for the status value
+    local status_option_id=$(gh api graphql -f query='
+query($projectId: ID!) {
+  node(id: $projectId) {
+    ... on ProjectV2 {
+      fields(first: 20) {
+        nodes {
+          ... on ProjectV2SingleSelectField {
+            id
+            name
+            options {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+}' -f projectId="$PROJECT_ID" | jq -r --arg status "$status_value" '.data.node.fields.nodes[] | select(.name == "Status") | .options[] | select(.name == $status) | .id // empty')
+
+    if [ -z "$status_option_id" ] || [ "$status_option_id" = "null" ]; then
+        output_error "Failed to find option ID for status: $status_value"
+    fi
+
     # Update the Status field for this issue
     log_info "Setting status to: $status_value (from $column)"
-    local update_response=$(gh project item-edit --id "$issue_item_id" --project-id "$PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$status_value" 2>&1)
+    local update_response=$(gh project item-edit --id "$issue_item_id" --project-id "$PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$status_option_id" 2>&1)
     
     if [ $? -eq 0 ]; then
         output_json "{\"success\": \"Issue status updated to $status_value\", \"item_id\": \"$issue_item_id\", \"original_column\": \"$column\"}"
