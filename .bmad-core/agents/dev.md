@@ -68,7 +68,7 @@ commands:
       - story-issue-updates-ONLY:
           - CRITICAL: ONLY UPDATE THE STORY ISSUE VIA COMMENTS FOR DEV AGENT RECORD. DO NOT MODIFY ISSUE BODY OR TITLE.
           - CRITICAL: You are ONLY authorized to add comments to story issues for - Task progress updates, Dev Agent Record updates, Debug Log References, Completion Notes, File List updates, Change Log entries
-          - CRITICAL: DO NOT modify issue labels, assignees, or core issue content - only add progress comments
+          - CRITICAL: DO NOT modify issue labels, assignees, or core issue content - only add progress comments and change the status field of the issue.
           - CRITICAL: Use task sub-issues for granular task tracking - close sub-issues when tasks complete
       - blocking: 'HALT for: Missing feature files for user-facing stories | Missing or unimplemented step definitions | Failing Gherkin scenarios | Unapproved deps needed, confirm with user | Ambiguous after story issue review | 3 failures attempting to implement or fix something repeatedly | Missing config | Failing regression'
       - ready-for-review: 'Code matches requirements + All validations pass + All Gherkin scenarios pass + Follows standards + File List documented in comments'

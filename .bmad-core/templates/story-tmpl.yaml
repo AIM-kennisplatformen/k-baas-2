@@ -59,6 +59,7 @@ sections:
       Use this section for task descriptions that will become issue titles and bodies.
       
       IMPORTANT: After subtask issues are created, remove the detailed descriptions from this section and keep only task titles with links to the subtask issues.
+      NOTE: If the subtasks already exist as issues, just link to them here and do not create duplicates.
     template: |
       - Task 1: [Brief title] (AC: # if applicable)
         - Description: [Detailed task description for sub-issue body]
@@ -94,7 +95,8 @@ sections:
       
       This section is populated by QA Agent using create-feature-files task.
       All user-observable acceptance criteria MUST have corresponding Gherkin scenarios.
-    template: |
+      NOTE: For non-user-facing stories (e.g., internal APIs, development infrastructure), this section may be omitted if there are no user-observable consequences.
+     template: |
       **Feature File:** `tests/features/{epic_slug}/{story_slug}.feature`
       
       **Status:** 🟡 Pending creation (use `*feature-files {story}` command)
@@ -116,6 +118,8 @@ sections:
       Track the creation and implementation status of Cucumber step definitions.
       Step definitions provide the implementation bridge between Gherkin scenarios and test code.
       This section is managed by both QA Agent (creation) and Dev Agent (implementation).
+      If there are no Gherkin scenarios for this story, this section may be omitted.
+      If no new step definitions are needed (e.g., reusing existing ones), indicate that here.
     template: |
       **Step Definition Files:**
       - `tests/steps/{story_slug}-steps.js` (Playwright-based)
