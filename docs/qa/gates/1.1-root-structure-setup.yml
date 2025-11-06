@@ -1,0 +1,31 @@
+schema: 1
+story: '1.1'
+story_title: 'Story 1.1: Root Structure Setup'
+gate: 'FAIL'
+status_reason: 'Root structure AC1 unsatisfied: missing scripts/ directory at repository root.'
+reviewer: 'Quinn (Test Architect)'
+updated: '2025-11-06T09:32:55Z'
+waiver: { active: false }
+top_issues:
+  - id: 'AC1-MISS-SCRIPTS'
+    severity: high
+    finding: 'Required top-level scripts/ directory is absent from repository root.'
+    suggested_action: 'Add empty scripts/ directory at root to satisfy baseline workspace layout.'
+    suggested_owner: 'dev'
+risk_summary:
+  totals: { critical: 0, high: 1, medium: 0, low: 0 }
+  recommendations:
+    must_fix:
+      - 'Create scripts/ directory at repo root so future automation and workspace conventions remain consistent.'
+    monitor: []
+quality_score: 80
+nfr_validation:
+  security: { status: PASS, notes: 'No security-impacting changes.' }
+  performance: { status: PASS, notes: 'Structure-only work.' }
+  reliability: { status: PASS, notes: 'No runtime logic involved.' }
+  maintainability: { status: CONCERNS, notes: 'Structural baseline incomplete until scripts/ exists.' }
+recommendations:
+  immediate:
+    - action: 'Add empty scripts/ directory and document its intended usage in README or scripts README.'
+      refs: ['repository root']
+  future: []

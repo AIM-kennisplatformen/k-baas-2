@@ -41,6 +41,7 @@ COMMANDS:
     update-status <issue_num> <status>      Update issue status
     list-stories [filter]                   List stories (default: "label:story state:open")
     migrate-stories                          Migrate Markdown stories to issues
+    get-story-context <issue_num>           Get comprehensive context for a user story
     help                                     Show this help message
     version                                  Show version information
 
@@ -51,6 +52,7 @@ EXAMPLES:
     ${SCRIPT_NAME} update-status 42 "In Progress"
     ${SCRIPT_NAME} list-stories
     ${SCRIPT_NAME} migrate-stories
+    ${SCRIPT_NAME} get-story-context 42
 
 For detailed usage examples, see: README.md
 Slug creation tips: derive from title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
@@ -757,6 +759,153 @@ list_stories() {
     echo "$output" | jq --arg filter "$filter" --arg count "$story_count" '. + [{"_metadata": {"filter": $filter, "count": ($count | tonumber)}}]'
 }
 
+get_story_context() {
+    local issue_num="$1"
+    
+    if [ -z "$issue_num" ]; then
+        output_error "Usage: get-story-context <issue_num>"
+    fi
+    
+    # Validate issue number
+    if ! [[ "$issue_num" =~ ^[0-9]+$ ]]; then
+        output_error "Invalid issue number: $issue_num. Must be numeric."
+    fi
+    
+    if [ -z "$REPO" ]; then
+        load_config
+    fi
+    
+    # Verify issue exists and get comprehensive data
+    log_info "Fetching context for issue #$issue_num..."
+    local issue_data=$(gh issue view "$issue_num" --repo "$REPO" --json number,title,state,body,labels,assignees,milestone,createdAt,updatedAt,closedAt,url 2>&1)
+    
+    if [ $? -ne 0 ]; then
+        output_error "Issue #$issue_num not found in repo $REPO"
+    fi
+    
+    # Validate JSON
+    if ! echo "$issue_data" | jq . >/dev/null 2>&1; then
+        output_error "Issue #$issue_num not found or invalid response from GitHub"
+    fi
+    
+    # Extract basic metadata
+    local title=$(echo "$issue_data" | jq -r '.title // empty')
+    local state=$(echo "$issue_data" | jq -r '.state // empty')
+    local body=$(echo "$issue_data" | jq -r '.body // empty')
+    local url=$(echo "$issue_data" | jq -r '.url // empty')
+    
+    if [ -z "$title" ]; then
+        output_error "Failed to extract issue metadata for #$issue_num"
+    fi
+    
+    # Parse acceptance criteria from body (look for ## Acceptance Criteria section)
+    local acceptance_criteria=$(echo "$body" | awk '
+        BEGIN { in_section = 0; content = "" }
+        /^##/ {
+            if (in_section) exit
+            if ($0 ~ /^## Acceptance Criteria/) in_section = 1
+            next
+        }
+        in_section {
+            if (content != "") content = content "\\n"
+            content = content $0
+        }
+        END { print content }
+    ')
+    
+    # Parse tasks/subtasks from body (look for ## Tasks section)
+    local tasks_section=$(echo "$body" | awk '
+        BEGIN { in_section = 0; content = "" }
+        /^##/ {
+            if (in_section) exit
+            if ($0 ~ /^## (Tasks|Subtasks|Tasks \/ Subtasks)/) in_section = 1
+            next
+        }
+        in_section {
+            if (content != "") content = content "\\n"
+            content = content $0
+        }
+        END { print content }
+    ')
+    
+    # Extract linked issues from body (looking for #123 patterns and sub-issue relationships)
+    local linked_issues=$(echo "$body" | grep -o '#[0-9]\+' | sed 's/#//' | sort -u | jq -R . | jq -s .)
+    
+    # Query comments to find "File List" entries
+    log_info "Checking comments for file lists..."
+    local comments_data=$(gh issue comments "$issue_num" --repo "$REPO" --json body,author 2>&1)
+    local file_lists="[]"
+    
+    if [ $? -eq 0 ] && [ -n "$comments_data" ]; then
+        # Look for comments containing "File List" or similar markers
+        file_lists=$(echo "$comments_data" | jq '[.[] | select(.body | test("(?i)(file list|files?:)")) | {author: .author.login, content: .body}]')
+    fi
+    
+    # Get sub-issues using GraphQL if available
+    log_info "Fetching sub-issues..."
+    local node_id=$(gh api "repos/$REPO/issues/$issue_num" --jq '.node_id' 2>/dev/null)
+    local sub_issues="[]"
+    
+    if [ -n "$node_id" ] && [ "$node_id" != "null" ]; then
+        local sub_issues_data=$(gh api graphql -f query='
+            query($nodeId: ID!) {
+                node(id: $nodeId) {
+                    ... on Issue {
+                        trackedIssues(first: 50) {
+                            edges {
+                                node {
+                                    number
+                                    title
+                                    state
+                                    url
+                                }
+                            }
+                        }
+                    }
+                }
+            }' -f nodeId="$node_id" 2>/dev/null)
+        
+        if [ $? -eq 0 ] && [ -n "$sub_issues_data" ]; then
+            sub_issues=$(echo "$sub_issues_data" | jq '[.data.node.trackedIssues.edges[].node // empty]')
+        fi
+    fi
+    
+    # Build comprehensive JSON result
+    local result=$(jq -n \
+        --arg issue_num "$issue_num" \
+        --argjson metadata "$issue_data" \
+        --arg acceptance_criteria "$acceptance_criteria" \
+        --arg tasks "$tasks_section" \
+        --argjson linked_issues "$linked_issues" \
+        --argjson file_lists "$file_lists" \
+        --argjson sub_issues "$sub_issues" \
+        '{
+            issue_number: ($issue_num | tonumber),
+            metadata: {
+                title: $metadata.title,
+                state: $metadata.state,
+                url: $metadata.url,
+                labels: $metadata.labels,
+                assignees: $metadata.assignees,
+                milestone: $metadata.milestone,
+                created_at: $metadata.createdAt,
+                updated_at: $metadata.updatedAt,
+                closed_at: $metadata.closedAt
+            },
+            body: $metadata.body,
+            parsed_sections: {
+                acceptance_criteria: $acceptance_criteria,
+                tasks: $tasks
+            },
+            linked_issues: $linked_issues,
+            sub_issues: $sub_issues,
+            file_lists: $file_lists
+        }')
+    
+    log_success "Successfully retrieved context for issue #$issue_num"
+    output_json "$result"
+}
+
 #=============================================================================
 # MIGRATION FUNCTIONS
 #=============================================================================
@@ -1018,6 +1167,12 @@ main() {
             ;;
         "migrate-stories")
             migrate_md_to_issues
+            ;;
+        "get-story-context")
+            if [ $# -lt 1 ]; then
+                output_error "Usage: get-story-context <issue_num>"
+            fi
+            get_story_context "$1"
             ;;
         "help"|"-h"|"--help")
             print_usage

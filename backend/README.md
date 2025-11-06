@@ -39,6 +39,67 @@ Once the server is running:
 pytest
 ```
 
+## Code Quality & Formatting
+
+This project uses [Ruff](https://github.com/astral-sh/ruff) for linting and formatting, and [mypy](https://mypy.readthedocs.io/) for static type checking.
+
+### Using Ruff
+
+**Check for linting issues:**
+```bash
+ruff check .
+```
+
+**Auto-fix linting issues:**
+```bash
+ruff check --fix .
+```
+
+**Format code:**
+```bash
+ruff format .
+```
+
+**Check formatting without changes:**
+```bash
+ruff format --check .
+```
+
+**Run both linting and formatting:**
+```bash
+ruff check --fix . && ruff format .
+```
+
+### Type Checking with mypy
+
+**Check types:**
+```bash
+mypy .
+```
+
+**Check specific file or directory:**
+```bash
+mypy app/
+```
+
+### Configuration
+
+**Ruff:**
+
+Ruff is configured with:
+- **Line length**: 88 characters (Black-compatible)
+- **Target version**: Python 3.13
+- **Style**: Black-compatible formatting with Google docstring convention
+- **Rules**: PEP 8, pyflakes, isort, and many flake8 plugins
+
+**mypy:**
+- **Python version**: 3.13
+- **Strictness**: Requires type hints on function definitions
+- **Error reporting**: Shows error codes and column numbers
+- See [`pyproject.toml`](pyproject.toml:113-145) for complete configuration
+
+For detailed development guidelines, see [`DEVELOPMENT.md`](DEVELOPMENT.md).
+
 ## Project Structure
 
 ```
