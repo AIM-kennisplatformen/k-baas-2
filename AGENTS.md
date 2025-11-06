@@ -86,7 +86,7 @@ Based on BMAD configuration:
 
 ### Frontend Technology Stack
 - **Framework**: React 19
-- **Build System**: Nx monorepo
+- **Build System**: Vite
 - **Rich Text Editor**: Lexical
 - **Graph Visualization**: React Flow
 - **Real-time Features**: Socket.IO client

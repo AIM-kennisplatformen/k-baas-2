@@ -6,7 +6,7 @@ This document provides a comprehensive overview of the K-BAAS-2 project structur
 
 ```
 k-baas-2/
-├── frontend/                          # React 19 frontend application (Nx workspace)
+├── frontend/                          # React 19 frontend application
 │   ├── src/
 │   │   ├── app/                      # Main application structure
 │   │   │   ├── App.tsx               # Root application component
@@ -37,7 +37,6 @@ k-baas-2/
 │   ├── package.json                  # Frontend dependencies
 │   ├── tsconfig.json                 # TypeScript configuration
 │   ├── vite.config.ts                # Vite build configuration
-│   └── nx.json                       # Nx workspace configuration
 ├── backend/                          # FastAPI backend application
 │   ├── app/                         # Application source code
 │   │   ├── main.py                  # FastAPI application entry point
@@ -141,7 +140,6 @@ k-baas-2/
 ### Frontend Structure
 - **Feature-based organization**: Each major feature (auth, wiki, graph, collaboration) has its own directory with components, hooks, and services
 - **Component co-location**: Tests are placed alongside components (`*.test.tsx` files)
-- **Nx workspace**: Enables efficient monorepo management and build optimization
 - **Vite build system**: Fast development and optimized production builds
 
 ### Backend Structure

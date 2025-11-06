@@ -35,7 +35,7 @@ Domain experts with specialized knowledge but limited technical expertise who ne
 ### Technology Stack
 
 - **Backend:** FastAPI (Python 3.13) with TypeDB knowledge graph database
-- **Frontend:** React 19 with Nx monorepo, Vite build system
+- **Frontend:** React 19 with Vite build system
 - **Rich Text Editor:** Lexical
 - **Graph Visualization:** React Flow
 - **Real-time Communication:** Socket.IO
@@ -76,13 +76,19 @@ cd k-baas-2
 ```
 
 ### 2. Environment Configuration
+
+The project uses a single root-level `.env` file for all configuration:
+
 ```bash
-# Copy environment template
+# Copy the example environment file
 cp .env.example .env
 
-# Edit .env file with your configuration
-# (Database URLs, API keys, etc.)
+# The .env file contains:
+# - BACKEND_PORT=6616  (FastAPI server port)
+# - FRONTEND_PORT=6166 (Vite dev server port)
 ```
+
+> **Note:** The `.env` file is already configured with default ports. Modify values as needed for your environment.
 
 ### 3. Frontend Setup
 ```bash
@@ -124,15 +130,20 @@ python -m app.utils.schema_generator
 npm run dev
 
 # Or start services individually:
-# Frontend development server
+# Frontend development server (runs on port 6166)
 cd frontend && npm run dev
 
-# Backend development server
-cd backend && uvicorn app.main:app --reload
+# Backend development server (runs on port 6616)
+cd backend && python -m app.main
+# Or: uvicorn app.main:app --reload --port 6616
 
 # Database services
 docker-compose up -d
 ```
+
+**Note:** Port numbers are configured in the root `.env` file:
+- Frontend: `FRONTEND_PORT=6166`
+- Backend: `BACKEND_PORT=6616`
 
 ### Production Build
 ```bash
@@ -178,7 +189,7 @@ k-baas-2/
 ```
 
 ### Key Directories
-- **`frontend/`**: React application with Nx workspace configuration
+- **`frontend/`**: React application 
 - **`backend/`**: FastAPI application with TypeDB integration
 - **`docs/`**: Comprehensive project documentation
 - **`scripts/`**: Development and deployment utility scripts

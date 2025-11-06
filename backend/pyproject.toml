@@ -5,14 +5,8 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi==0.117",
     "uvicorn[standard]",
+    "python-dotenv",
 ]
-
-[project.scripts]
-start = "uvicorn app.main:app --reload"
-
-[project.scripts]
-start = "uvicorn app.main:app --reload"
-
 
 [build-system]
 requires = ["setuptools"]
