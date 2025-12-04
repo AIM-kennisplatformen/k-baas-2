@@ -17,7 +17,8 @@ This is the DEFINITIVE technology selection section. All technology choices are 
 | **Package Manager** | uv | 0.8.22 | Python dependency management | Fastest Python package manager, excellent lock file support, reliable dependency resolution |
 | **WebSocket** | python-socketio | 5.11.0 | Real-time communication | Mature Socket.io implementation for Python, supports real-time collaboration features |
 | **Schema/Validation** | Pydantic | (FastAPI dependency) | Data validation and models | Type safety, automatic documentation, seamless FastAPI integration, generated from TypeDB schema |
-| **Authentication** | PyJWT | 2.8.0 | JWT token handling | Industry standard for stateless authentication, secure token management |
+| **Identity Provider** | Authentik | 2024.10 | SSO, user management, RBAC | Self-hosted IdP with OIDC/OAuth2, social login, self-service flows |
+| **OIDC Client** | fastapi-oidc | latest | JWT token validation | OIDC token validation against Authentik JWKS endpoint |
 | **HTTP Client** | httpx | 0.28 | AI service integration | Modern async HTTP client for external LLM API calls |
 | **Container** | Docker | 24.0.7 | Application containerization | Consistent deployment environments, development environment standardization |
 | **Build Tool** | Docker Compose | 2.23.0 | Local development orchestration | Multi-container development environment, service coordination |
@@ -29,6 +30,7 @@ This is the DEFINITIVE technology selection section. All technology choices are 
 | **Schema Generation** | TypeDB Python Driver | 3.5 | TypeDB schema introspection | Generate Pydantic models from TypeDB schema definitions |
 
 **Key Technology Integrations:**
+- **Authentik + FastAPI:** OIDC-based authentication with JWT validation via JWKS, RBAC via group claims
 - **TypeDB → Pydantic Pipeline:** Custom tooling will introspect TypeDB schema and generate corresponding Pydantic models
 - **FastAPI + Pydantic:** Automatic API documentation and request/response validation based on generated models
 - **Socket.io + FastAPI:** Real-time collaboration layer integrated with REST API endpoints

@@ -2,15 +2,21 @@
 
 ## Authentication & Authorization
 
-**Dual Authentication Support:**
-- **Username/Password:** JWT tokens with RS256 signing, 1-hour access tokens with refresh token rotation
-- **OAuth Integration:** Support for Google, GitHub, Microsoft with secure token exchange
-- **Session Management:** Stateless JWT authentication with secure token storage
+**Identity Provider: Authentik (Self-Hosted)**
 
-**Authorization Patterns:**
-- All protected endpoints use FastAPI `Depends()` for authentication validation
-- Knowledge base access control through team membership verification
-- Multi-database security ensuring users only access authorized knowledge bases
+All authentication and user management is handled by [Authentik](https://goauthentik.io/), a self-hosted identity provider deployed via Docker Compose. See [Authentik Integration](./authentik-integration.md) for complete implementation details.
+
+**Authentication Features:**
+- **SSO via OIDC/OAuth2:** JWT tokens signed asymmetrically (RS256) via Authentik JWKS
+- **Social Login:** Google, GitHub, Microsoft configured as Authentik sources
+- **Self-Service:** User registration, password recovery, and MFA via Authentik flows
+- **Token Management:** Access tokens (30 min), refresh tokens (30 days) with `offline_access` scope
+
+**Authorization (RBAC):**
+- Authentik groups mapped to application roles: `kb-admin`, `kb-editor`, `kb-viewer`
+- FastAPI `Depends()` validates JWT and checks group claims
+- Knowledge base access control through team membership in Authentik
+- Per-KB ownership via dynamic groups (e.g., `kb-owner:{kb_id}`)
 
 ## Input Validation & API Security
 
@@ -35,8 +41,8 @@
 **Secrets Management:**
 - Development: Environment variables with `.env` file validation
 - Production: External secret management service integration
-- JWT signing keys rotated regularly
-- OAuth client secrets stored securely
+- Authentik manages JWT signing keys and rotation
+- OAuth client secrets stored in Authentik configuration
 
 ## Database Security
 

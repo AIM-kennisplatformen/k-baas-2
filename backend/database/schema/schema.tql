@@ -1,0 +1,44 @@
+define
+# Entity types
+entity wiki-page,
+  owns title,
+  owns content,
+  owns created-at,
+  owns updated-at,
+  plays connection:from-page,
+  plays connection:to-page,
+  plays authorship:authored-page,
+  plays editing:edited-page;
+
+entity user,
+  owns username,
+  owns email,
+  owns created-at,
+  plays authorship:author,
+  plays editing:editor;
+
+# Relation types
+relation connection,
+  relates from-page,
+  relates to-page,
+  owns connection-type,
+  owns created-at;
+
+relation authorship,
+  relates author,
+  relates authored-page;
+
+relation editing,
+  relates editor,
+  relates edited-page,
+  owns edit-timestamp;
+
+# Attribute types
+attribute title, value string;
+attribute content, value string;
+attribute username, value string;
+attribute email, value string;
+attribute connection-type, value string;
+attribute created-at, value datetime;
+attribute updated-at, value datetime;
+attribute edit-timestamp, value datetime;

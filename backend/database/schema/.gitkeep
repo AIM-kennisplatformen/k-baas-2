@@ -1,0 +1,3 @@
+# Place your TypeDB schema and seed files in this directory
+# - schema.tql: Your TypeDB schema definition
+# - seed.tql: Your initial seed data

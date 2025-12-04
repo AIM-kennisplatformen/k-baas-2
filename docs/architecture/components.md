@@ -2,21 +2,25 @@
 
 Based on the multi-database architecture and data models, the system is organized into distinct service components with clear responsibilities and interfaces.
 
-## Authentication Service
+## Authentication Service (Authentik)
 
-**Responsibility:** User authentication supporting both username/password and OAuth providers, session management with JWT tokens
+**Responsibility:** All authentication, user management, SSO, and RBAC delegated to Authentik identity provider
 
-**Key Interfaces:**
-- POST /auth/register - User registration with email/password
-- POST /auth/login - Username/password authentication
-- POST /auth/oauth/{provider}/login - OAuth authentication (Google, GitHub, Microsoft)
-- POST /auth/refresh - JWT token refresh mechanism
-- GET /auth/me - Current user profile retrieval
-- DELETE /auth/logout - Session termination
+**Architecture:** Authentik runs as a separate Docker Compose service. The FastAPI backend validates JWT tokens issued by Authentik and extracts user/group claims for authorization. See [Authentik Integration](./authentik-integration.md) for complete details.
 
-**Dependencies:** User repository (core database), OAuth provider APIs, JWT token management
+**Key Interfaces (Authentik-handled):**
+- User registration, login, password recovery via Authentik flows
+- Social login (Google, GitHub, Microsoft) via Authentik sources
+- Token issuance and refresh via Authentik OAuth2 provider
 
-**Technology Stack:** FastAPI routing, PyJWT for token handling, OAuth libraries for provider integration, bcrypt for password hashing
+**FastAPI Integration:**
+- GET /auth/me - Current user profile (from validated JWT claims)
+- JWT validation via `fastapi-oidc` against Authentik JWKS endpoint
+- RBAC via Authentik group claims mapped to application roles
+
+**Dependencies:** Authentik OIDC endpoints, JWKS for token validation
+
+**Technology Stack:** Authentik (IdP), fastapi-oidc for JWT validation, Pydantic for user models
 
 ## Knowledge Base Management Service
 
@@ -136,11 +140,16 @@ graph TB
         BLOB[Blob Storage<br/>Documents/Media]
     end
 
+    subgraph "Identity Provider"
+        AUTHENTIK[Authentik<br/>SSO, OIDC, RBAC]
+    end
+
     subgraph "External Services"
-        OAUTH[OAuth Providers<br/>Google, GitHub, etc.]
+        SOCIAL[Social Login<br/>Google, GitHub, etc.]
         LLM[External LLMs<br/>OpenAI, Anthropic]
     end
 
+    AUTHENTIK --> SOCIAL
     ROUTER --> AUTH
     ROUTER --> KB_MGT
     ROUTER --> CONCEPT
@@ -150,8 +159,7 @@ graph TB
 
     WEBSOCKET --> COLLAB
 
-    AUTH --> CORE_DB
-    AUTH --> OAUTH
+    AUTH --> AUTHENTIK
     KB_MGT --> CORE_DB
     KB_MGT --> KB_DB1
     KB_MGT --> KB_DB2

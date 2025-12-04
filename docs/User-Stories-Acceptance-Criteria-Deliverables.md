@@ -110,17 +110,16 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 **As a developer, I want comprehensive .gitignore files so that unwanted files are never committed.**
 
 #### Acceptance Criteria:
-- Root .gitignore covers common system and editor files
-- Frontend .gitignore covers Node.js specific patterns (node_modules/, dist/, .env.local)
-- Backend .gitignore covers Python specific patterns (__pycache__/, .venv/, *.pyc)
+- Root-level `.gitignore` covers common system and editor files
+- Node.js-specific patterns (node_modules/, dist/, .env.local) are included in the root `.gitignore`
+- Python-specific patterns (__pycache__/, .venv/, *.pyc) are included in the root `.gitignore`
 - IDE-specific files are ignored (.vscode/, .idea/, *.swp)
 - Environment and secret files are explicitly ignored
 
 #### Deliverables:
-- Root-level .gitignore for system/editor files
-- Frontend-specific .gitignore in frontend/ directory
-- Backend-specific .gitignore in backend/ directory
-- Comprehensive ignore patterns for secrets and generated files
+- Repository-wide `.gitignore` with sections for system/editor, Node.js, and Python artifacts
+- Documented ignore patterns for IDE, environment, and secret files within the root `.gitignore`
+- Comprehensive ignore coverage for generated and temporary files
 
 ### Story 1.6: Frontend Development Environment Setup
 **As a frontend developer, I want a configured JavaScript development environment so that I can start building React components efficiently.**
@@ -214,13 +213,11 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 - FastAPI application structure is established
 - TypeDB connection code is integrated
 - Health check endpoints are functional
-- Authentication framework is configured
 - CORS and security headers are properly set
 
 #### Deliverables:
 - FastAPI application structure
 - TypeDB integration
-- Authentication framework
 - API health check endpoints
 - Security configuration
 
@@ -249,16 +246,20 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 **As a domain expert, I want to register for an account so that I can access the knowledge graph wiki tool.**
 
 #### Acceptance Criteria:
-- Registration form accepts email and password
+- Authentik identity provider is configured and running via Docker Compose
+- Self-service registration flow is enabled in Authentik
+- Registration form accepts email and password via Authentik UI
 - Input validation prevents invalid data
-- User data is stored securely
+- User data is stored securely in Authentik
 - Registration process provides clear feedback
+- Email verification flow is configured
 
 #### Deliverables:
-- User registration form UI
-- Registration API endpoint
-- Input validation system
-- User data storage mechanism
+- Authentik Docker Compose configuration
+- Authentik OAuth2/OIDC provider for K-BAAS-2 application
+- Self-service enrollment flow configuration
+- FastAPI integration with Authentik (JWT validation via JWKS)
+- User registration via Authentik flows
 
 ### Story 2.2: User Authentication (V0.7)
 **As a domain expert, I want to log in to my account so that I can access my knowledge bases.**

@@ -4,9 +4,15 @@
 
 **Docker Strategy:**
 - Multi-stage builds for optimized production images
-- Separate containers: FastAPI backend, TypeDB server, blob storage
+- Separate containers: FastAPI backend, TypeDB server, Authentik (server + worker + PostgreSQL + Redis), blob storage
 - Development: Docker Compose with hot reload and debug capabilities
 - Production: Optimized images with minimal attack surface
+
+**Authentik Services:**
+- `authentik-server`: Main Authentik application (ports 9000/9443)
+- `authentik-worker`: Background task processor
+- `authentik-postgresql`: Authentik database
+- `authentik-redis`: Authentik cache and session store
 
 ## Environment Management
 

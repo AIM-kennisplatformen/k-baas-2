@@ -1,0 +1,67 @@
+# Insert sample users
+insert $u1 isa user,
+  has username "admin",
+  has email "admin@kbaas.local",
+  has created-at 2024-01-01T00:00:00;
+
+insert $u2 isa user,
+  has username "demo-user",
+  has email "demo@kbaas.local",
+  has created-at 2024-01-02T00:00:00;
+
+# Insert sample wiki pages
+insert $p1 isa wiki-page,
+  has title "Getting Started",
+  has content "Welcome to the Knowledge Graph Wiki! This is a sample page to help you get started.",
+  has created-at 2024-01-01T10:00:00,
+  has updated-at 2024-01-01T10:00:00;
+
+insert $p2 isa wiki-page,
+  has title "TypeDB Basics",
+  has content "TypeDB is a knowledge graph database with a rich semantic type system.",
+  has created-at 2024-01-01T11:00:00,
+  has updated-at 2024-01-01T11:00:00;
+
+insert $p3 isa wiki-page,
+  has title "Graph Visualization",
+  has content "Learn how to visualize and explore knowledge graphs in this wiki tool.",
+  has created-at 2024-01-01T12:00:00,
+  has updated-at 2024-01-01T12:00:00;
+
+# Create authorship relations
+match
+  $u isa user, has username "admin";
+  $p1 isa wiki-page, has title "Getting Started";
+insert (author: $u, authored-page: $p1) isa authorship;
+
+match
+  $u isa user, has username "admin";
+  $p2 isa wiki-page, has title "TypeDB Basics";
+insert (author: $u, authored-page: $p2) isa authorship;
+
+match
+  $u isa user, has username "demo-user";
+  $p3 isa wiki-page, has title "Graph Visualization";
+insert (author: $u, authored-page: $p3) isa authorship;
+
+# Create connections between pages
+match
+  $p1 isa wiki-page, has title "Getting Started";
+  $p2 isa wiki-page, has title "TypeDB Basics";
+insert (from-page: $p1, to-page: $p2) isa connection,
+  has connection-type "related-to",
+  has created-at 2024-01-01T13:00:00;
+
+match
+  $p2 isa wiki-page, has title "TypeDB Basics";
+  $p3 isa wiki-page, has title "Graph Visualization";
+insert (from-page: $p2, to-page: $p3) isa connection,
+  has connection-type "leads-to",
+  has created-at 2024-01-01T14:00:00;
+
+match
+  $p1 isa wiki-page, has title "Getting Started";
+  $p3 isa wiki-page, has title "Graph Visualization";
+insert (from-page: $p1, to-page: $p3) isa connection,
+  has connection-type "see-also",
+  has created-at 2024-01-01T15:00:00;

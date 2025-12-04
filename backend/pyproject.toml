@@ -5,7 +5,9 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]==0.117",
     "uvicorn[standard]",
-    "python-dotenv",
+    "pydantic-settings>=2.6.0",
+    "python-socketio>=5.14.3",
+    "typedb-driver>=3.5.5",
 ]
 
 [project.optional-dependencies]
@@ -18,6 +20,9 @@ dev = [
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app"]
 
 [tool.ruff]
 # Black-compatible line length
@@ -144,4 +149,26 @@ exclude = [
     "^venv/",
     "^build/",
     "^dist/",
+]
+
+[tool.pytest.ini_options]
+# Test discovery
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# Output and behavior
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
+    "--verbose",
+]
+
+# Markers
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
 ]

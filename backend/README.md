@@ -13,12 +13,18 @@ FastAPI backend for the K-BAAS-2 Knowledge Graph Wiki Tool.
 
 ## Running the Development Server
 
-**Option 1: Using uvicorn directly**
+**Recommended: Using uv scripts**
+```bash
+uv run dev         # Start dev server with auto-reload
+uv run start       # Start on port 6616 (configured)
+```
+
+**Alternative: Using uvicorn directly**
 ```bash
 uvicorn app.main:app --reload --port 6616
 ```
 
-**Option 2: Using Python module (reads BACKEND_PORT from root .env)**
+**Alternative: Using Python module (reads BACKEND_PORT from root .env)**
 ```bash
 python -m app.main
 ```
@@ -33,10 +39,33 @@ Once the server is running:
 - Interactive API docs (Swagger UI): http://localhost:6616/docs
 - Alternative API docs (ReDoc): http://localhost:6616/redoc
 
-## Running Tests
+## Development Scripts
 
+All scripts are configured in [`pyproject.toml`](pyproject.toml) and run via `uv run`:
+
+### Running the App
 ```bash
-pytest
+uv run dev           # Start dev server with auto-reload
+uv run start         # Start on configured port (6616)
+```
+
+### Testing
+```bash
+uv run test          # Run all tests with pytest
+pytest -v            # Run with verbose output (configured by default)
+pytest -m unit       # Run only unit tests
+pytest -m integration # Run only integration tests
+pytest -m "not slow" # Skip slow tests
+```
+
+### Code Quality
+```bash
+uv run lint          # Check for linting issues
+uv run lint-fix      # Auto-fix linting issues
+uv run format        # Format code with ruff
+uv run format-check  # Check formatting without changes
+uv run typecheck     # Run mypy type checking
+uv run check         # Run all checks (lint + format + types)
 ```
 
 ## Code Quality & Formatting
