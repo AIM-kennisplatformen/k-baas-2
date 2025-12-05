@@ -1,0 +1,83 @@
+# K-BAAS-2 Backend .dockerignore
+# Files to exclude from Docker build context
+
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Python virtual environments
+.Python
+env/
+.env
+.env.local
+.env.*.local
+venv/
+.venv/
+ENV/
+.virtualenvs/
+
+# uv cache and lock (include lock for reproducible builds though)
+.uv/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker files (don't need to copy these into context)
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Testing and coverage
+tests/
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
+.tox/
+.nox/
+*.cover
+*.coverage
+nosetests.xml
+coverage.xml
+test_*.py
+*_test.py
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Logs
+*.log
+logs/
+
+# Type checking cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff cache
+.ruff_cache/
+
+# TypeDB specific
+*.sock
+
+# Local development
+.env.example
+COMMANDS.md

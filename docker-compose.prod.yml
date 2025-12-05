@@ -1,0 +1,90 @@
+# K-BAAS-2 Production Docker Compose Configuration
+#
+# This file extends the base configuration with production-specific settings:
+# - No volume mounts (source code is baked into images at build time)
+# - Production build targets in multi-stage Dockerfiles
+# - Uses .env.production for non-secret defaults
+# - Secrets MUST be set via deployment platform (e.g., Dokploy, Portainer)
+#
+# REQUIRED SECRETS (Docker Compose will fail if these are not set):
+# - TYPEDB_ADMIN_PASSWORD: TypeDB admin password
+# - TYPEDB_USER_PASSWORD: TypeDB user password
+# - JWT_SECRET_KEY: Secret key for JWT token signing
+# - AUTHENTIK_CLIENT_SECRET: OAuth2 client secret (if using Authentik)
+#
+# Usage (via kbaas script):
+#   ./kbaas prod           # Start production with Authentik
+#   ./kbaas prod --no-auth # Start production without Authentik
+#
+# In deployment platforms, typically configure:
+# 1. Set compose file to docker-compose.prod.yml
+# 2. Set secrets (AUTHENTIK_SECRET_KEY, AUTHENTIK_PG_PASS, etc.) in platform UI
+# 3. Configure build args for frontend VITE_* variables
+#
+# NOTE: Authentik services are defined in docker-compose.authentik.yml
+#       and loaded conditionally by the kbaas script
+
+services:
+  # ===================
+  # APPLICATION SERVICES
+  # ===================
+
+  typedb:
+    extends:
+      file: docker-compose.base.yml
+      service: typedb
+    env_file:
+      - .env.production
+    networks:
+      - kbaas-network
+
+  backend:
+    extends:
+      file: docker-compose.base.yml
+      service: backend
+    build:
+      context: ./backend
+      target: production
+    env_file:
+      - .env.production
+    environment:
+      # Override for production
+      - APP_ENV=production
+      - DEBUG=false
+      # REQUIRED SECRETS - Docker Compose will fail if these are not set
+      # Set these in your deployment platform (Dokploy, Portainer, etc.), NOT in files
+      # Generate secure values with: openssl rand -base64 32
+      - TYPEDB_ADMIN_PASSWORD=${TYPEDB_ADMIN_PASSWORD:?TYPEDB_ADMIN_PASSWORD is required for production - set in deployment platform}
+      - TYPEDB_USER_PASSWORD=${TYPEDB_USER_PASSWORD:?TYPEDB_USER_PASSWORD is required for production - set in deployment platform}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required for production - set in deployment platform}
+      # Authentik secret - required if using Authentik authentication
+      - AUTHENTIK_CLIENT_SECRET=${AUTHENTIK_CLIENT_SECRET:-}
+    # No volumes - source code is copied into image at build time
+    depends_on:
+      typedb:
+        condition: service_healthy
+    networks:
+      - kbaas-network
+
+  frontend:
+    extends:
+      file: docker-compose.base.yml
+      service: frontend
+    build:
+      context: ./frontend
+      target: production
+      # Build args for Vite - these get inlined into the bundle at build time
+      args:
+        - VITE_BACKEND_URL=${VITE_BACKEND_URL}
+        - VITE_AUTHENTIK_URL=${VITE_AUTHENTIK_URL}
+        - VITE_AUTHENTIK_CLIENT_ID=${VITE_AUTHENTIK_CLIENT_ID}
+    env_file:
+      - .env.production
+    ports:
+      - "${FRONTEND_PORT:-6166}:6166"
+    # No volumes - source code is copied into image at build time
+    networks:
+      - kbaas-network
+
+volumes:
+  typedb-data:

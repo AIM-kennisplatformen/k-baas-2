@@ -1,0 +1,126 @@
+# ===========================================
+# K-BAAS-2 Git Attributes Configuration
+# ===========================================
+# Ensures cross-platform compatibility (Windows/macOS/Linux)
+# Critical for Docker containers and shell scripts
+
+# ===========================================
+# LINE ENDING NORMALIZATION
+# ===========================================
+
+# Auto-detect text files and normalize to LF on commit
+* text=auto
+
+# Shell scripts - MUST use LF (critical for Docker/Linux)
+*.sh text eol=lf
+kbaas text eol=lf
+backend/database/init-typedb.sh text eol=lf
+
+# Docker files
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+
+# ===========================================
+# CONFIGURATION FILES
+# ===========================================
+
+# Docker Compose
+docker-compose*.yml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# JSON (prettier-friendly)
+*.json text eol=lf
+
+# Python
+*.py text eol=lf
+*.pyx text eol=lf
+pyproject.toml text eol=lf
+uv.lock text eol=lf
+
+# JavaScript/TypeScript
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+
+# Web
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.md text eol=lf
+*.svg text eol=lf
+
+# TypeDB
+*.tql text eol=lf
+
+# Environment files
+.env* text eol=lf
+
+# ===========================================
+# BINARY FILES (no line ending conversion)
+# ===========================================
+
+# Images (raster formats)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+
+# Documents
+*.pdf binary
+
+# Fonts
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.tgz binary
+
+# ===========================================
+# LOCK FILES - MERGE STRATEGY
+# ===========================================
+
+# Package lock files - regenerate on conflict rather than merge
+package-lock.json merge=ours
+uv.lock merge=ours
+
+# ===========================================
+# DIFF IMPROVEMENTS
+# ===========================================
+
+# Better diffs for Python
+*.py diff=python
+
+# ===========================================
+# EXPORT IGNORE (for `git archive`)
+# ===========================================
+
+# Exclude from release archives
+.bmad-core/ export-ignore
+.claude/ export-ignore
+.cursor/ export-ignore
+.roo/ export-ignore
+.github/ export-ignore
+docs/ export-ignore
+*.md export-ignore
+tests/ export-ignore
+backend/tests/ export-ignore
+
+# ===========================================
+# LINGUIST OVERRIDES (GitHub language stats)
+# ===========================================
+
+# Don't count generated/vendor files in language stats
+*.lock linguist-generated
+docs/* linguist-documentation

@@ -1,0 +1,102 @@
+# K-BAAS-2 Authentik Services Configuration
+# This file contains Authentik identity provider services.
+# These services provide OAuth2/OIDC authentication for the application.
+#
+# This file is loaded conditionally by the kbaas script:
+#   ./kbaas dev           # includes Authentik
+#   ./kbaas dev --no-auth # excludes Authentik
+#
+# Environment variables are read from .env (dev) or .env.production (prod)
+
+services:
+  authentik-postgresql:
+    image: docker.io/library/postgres:16-alpine
+    container_name: kbaas-authentik-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${AUTHENTIK_PG_DB:-authentik}
+      POSTGRES_USER: ${AUTHENTIK_PG_USER:-authentik}
+      POSTGRES_PASSWORD: ${AUTHENTIK_PG_PASS:?authentik database password required}
+    volumes:
+      - authentik_database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - kbaas-network
+
+  authentik-redis:
+    image: docker.io/library/redis:alpine
+    container_name: kbaas-authentik-redis
+    restart: unless-stopped
+    command: --save 60 1 --loglevel warning
+    volumes:
+      - authentik_redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+    networks:
+      - kbaas-network
+
+  authentik-server:
+    image: ghcr.io/goauthentik/server:2024.10
+    container_name: kbaas-authentik-server
+    restart: unless-stopped
+    command: server
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?authentik secret key required}
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+      AUTHENTIK_POSTGRESQL__NAME: ${AUTHENTIK_PG_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__USER: ${AUTHENTIK_PG_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_PG_PASS}
+    ports:
+      - "${AUTHENTIK_PORT_HTTP:-9000}:9000"
+      - "${AUTHENTIK_PORT_HTTPS:-9443}:9443"
+    volumes:
+      - ./authentik/media:/media
+      - ./authentik/templates:/templates
+    depends_on:
+      authentik-postgresql:
+        condition: service_healthy
+      authentik-redis:
+        condition: service_healthy
+    networks:
+      - kbaas-network
+
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:2024.10
+    container_name: kbaas-authentik-worker
+    restart: unless-stopped
+    command: worker
+    environment:
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+      AUTHENTIK_POSTGRESQL__NAME: ${AUTHENTIK_PG_DB:-authentik}
+      AUTHENTIK_POSTGRESQL__USER: ${AUTHENTIK_PG_USER:-authentik}
+      AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_PG_PASS}
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./authentik/media:/media
+      - ./authentik/templates:/templates
+      - ./authentik/certs:/certs
+    depends_on:
+      authentik-postgresql:
+        condition: service_healthy
+      authentik-redis:
+        condition: service_healthy
+    networks:
+      - kbaas-network
+
+volumes:
+  authentik_database:
+    driver: local
+  authentik_redis:
+    driver: local

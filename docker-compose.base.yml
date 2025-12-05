@@ -1,0 +1,90 @@
+# K-BAAS-2 Base Docker Compose Configuration
+# This file contains shared service definitions used by both development and production.
+# Do not run this file directly - use docker-compose.yml (dev) or docker-compose.prod.yml (prod)
+
+services:
+  typedb:
+    # Custom build with init script for automated schema loading
+    # Preserves K-BAAS-2's existing TypeDB initialization approach
+    build:
+      context: ./backend/database
+      dockerfile: Dockerfile
+    container_name: kbaas-typedb
+    restart: unless-stopped
+    ports:
+      - "${TYPEDB_PORT:-1729}:1729"
+      - "${TYPEDB_HTTP_PORT:-1728}:8000"
+    volumes:
+      - typedb-data:/opt/typedb-all-linux/server/data
+    environment:
+      - ADMIN_PASSWORD=${TYPEDB_ADMIN_PASSWORD:-}
+      - DATABASE_NAME=${TYPEDB_DATABASE_NAME:-}
+      - DATABASE_USER_NAME=${TYPEDB_USER_NAME:-}
+      - DATABASE_USER_PASSWORD=${TYPEDB_USER_PASSWORD:-}
+      - SCHEMA_NAME=${TYPEDB_SCHEMA_FILE:-schema.tql}
+      - SEED_NAME=${TYPEDB_SEED_FILE:-seed.tql}
+      # Set FORCE_REINIT=true to recreate database and reload schema/seed on restart
+      - FORCE_REINIT=${FORCE_REINIT:-false}
+    healthcheck:
+      # TypeDB 3.5.5 GRPC port (1729) is always available - more reliable than HTTP API
+      test: ["CMD", "nc", "-z", "localhost", "1729"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  backend:
+    container_name: kbaas-backend
+    build:
+      context: ./backend
+    depends_on:
+      typedb:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-6616}:6616"
+    environment:
+      # Python runtime settings
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONPATH=/app
+      # Application settings
+      - APP_ENV=${APP_ENV:-development}
+      - DEBUG=${DEBUG:-true}
+      - BACKEND_PORT=${BACKEND_PORT:-6616}
+      - BACKEND_HOST=0.0.0.0
+      # TypeDB connection (uses Docker hostname)
+      - TYPEDB_HOST=typedb
+      - TYPEDB_PORT=1729
+      - TYPEDB_DATABASE_NAME=${TYPEDB_DATABASE_NAME:-kennisbaas}
+      - TYPEDB_ADMIN_PASSWORD=${TYPEDB_ADMIN_PASSWORD:-password123}
+      - TYPEDB_USER_NAME=${TYPEDB_USER_NAME:-admin}
+      - TYPEDB_USER_PASSWORD=${TYPEDB_USER_PASSWORD:-password123}
+      # Frontend URL for CORS
+      - FRONTEND_PORT=${FRONTEND_PORT:-6166}
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:6616}
+      # Authentik integration
+      - AUTHENTIK_URL=${AUTHENTIK_URL:-http://authentik-server:9000}
+      - AUTHENTIK_CLIENT_ID=${AUTHENTIK_CLIENT_ID:-}
+      - AUTHENTIK_CLIENT_SECRET=${AUTHENTIK_CLIENT_SECRET:-}
+      - AUTHENTIK_ISSUER=${AUTHENTIK_ISSUER:-}
+      - AUTHENTIK_APP_SLUG=${AUTHENTIK_APP_SLUG:-k-baas-2}
+
+  frontend:
+    container_name: kbaas-frontend
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    environment:
+      # Frontend environment variables (VITE_ prefix required for Vite)
+      - VITE_BACKEND_URL=${VITE_BACKEND_URL:-http://localhost:6616}
+      - VITE_AUTHENTIK_URL=${VITE_AUTHENTIK_URL:-http://localhost:9000}
+      - VITE_AUTHENTIK_CLIENT_ID=${VITE_AUTHENTIK_CLIENT_ID:-}
+
+volumes:
+  typedb-data:
+    driver: local
+
+networks:
+  kbaas-network:
+    driver: bridge

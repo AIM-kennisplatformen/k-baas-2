@@ -1,0 +1,241 @@
+#!/bin/bash
+
+# K-BAAS-2 CLI Tool
+# Manages Docker containers for development and production environments
+
+set -e
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Help function
+show_help() {
+    echo -e "${BLUE}K-BAAS-2 CLI Tool${NC}"
+    echo ""
+    echo -e "${GREEN}USAGE:${NC}"
+    echo "    ./kbaas [COMMAND] [OPTIONS]"
+    echo ""
+    echo -e "${GREEN}COMMANDS:${NC}"
+    echo "    dev, development    Start development environment (default)"
+    echo "    prod, production    Start production environment"
+    echo "    logs                Show logs for backend and frontend"
+    echo "    down, stop          Stop all services"
+    echo "    reset               Full reset: remove volumes, rebuild images"
+    echo "    help, -h, --help    Show this help message"
+    echo ""
+    echo -e "${GREEN}OPTIONS:${NC}"
+    echo "    --attached, -a      Run in foreground (attached mode, shows all logs)"
+    echo "    --no-auth           Skip Authentik services (lighter development)"
+    echo ""
+    echo -e "${GREEN}EXAMPLES:${NC}"
+    echo "    ./kbaas dev              # Start dev environment (detached)"
+    echo "    ./kbaas dev --attached   # Start dev in foreground"
+    echo "    ./kbaas dev --no-auth    # Start dev without Authentik"
+    echo "    ./kbaas prod             # Start production environment"
+    echo "    ./kbaas reset            # Full reset and rebuild"
+    echo "    ./kbaas logs             # View logs"
+    echo "    ./kbaas down             # Stop all services"
+    echo ""
+    echo -e "${GREEN}SERVICE URLS:${NC}"
+    echo "    Frontend:      http://localhost:\${FRONTEND_PORT:-6166}"
+    echo "    Backend API:   http://localhost:\${BACKEND_PORT:-6616}"
+    echo "    TypeDB HTTP:   http://localhost:\${TYPEDB_HTTP_PORT:-1728}"
+    echo "    Authentik:     http://localhost:\${AUTHENTIK_PORT_HTTP:-9000}"
+    echo ""
+    echo -e "${GREEN}MORE INFO:${NC}"
+    echo "    See docs/docker-setup.md for detailed documentation."
+    exit 0
+}
+
+MODE="dev"
+RESET_ARG=""
+NO_AUTH=""
+LOGS_ONLY=""
+ATTACHED=""
+DOWN_ONLY=""
+
+# Parse arguments
+for arg in "$@"; do
+    case $arg in
+        help|-h|--help)
+            show_help
+            ;;
+        prod|production)
+            MODE="prod"
+            ;;
+        dev|development)
+            MODE="dev"
+            ;;
+        reset|-reset|--reset)
+            RESET_ARG="reset"
+            ;;
+        --no-auth|-no-auth|no-auth)
+            NO_AUTH="true"
+            ;;
+        logs)
+            LOGS_ONLY="true"
+            ;;
+        --attached|-a|attached)
+            ATTACHED="true"
+            ;;
+        down|stop)
+            DOWN_ONLY="true"
+            ;;
+    esac
+done
+
+# Build compose file list based on mode and options
+COMPOSE_FILES="-f docker-compose.base.yml"
+
+if [[ "$NO_AUTH" != "true" ]]; then
+    COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.authentik.yml"
+fi
+
+if [[ "$MODE" == "prod" ]]; then
+    COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.prod.yml"
+    echo -e "${BLUE}K-BAAS-2 Production Mode${NC}"
+else
+    COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.yml"
+    echo -e "${BLUE}K-BAAS-2 Development Mode${NC}"
+fi
+
+# Full compose file list for reset (always includes all files to ensure complete cleanup)
+ALL_COMPOSE_FILES="-f docker-compose.base.yml -f docker-compose.authentik.yml -f docker-compose.yml -f docker-compose.prod.yml"
+
+if [[ "$NO_AUTH" == "true" ]]; then
+    echo -e "${YELLOW}(Authentik disabled)${NC}"
+fi
+
+# Handle down command
+if [[ "$DOWN_ONLY" == "true" ]]; then
+    echo -e "${GREEN}Stopping K-BAAS-2 services...${NC}"
+    docker compose $COMPOSE_FILES down
+    exit 0
+fi
+
+# Handle logs-only mode
+if [[ "$LOGS_ONLY" == "true" ]]; then
+    echo -e "${GREEN}Showing logs...${NC}"
+    docker compose $COMPOSE_FILES logs -f backend frontend --tail 50
+    exit 0
+fi
+
+# Determine which .env file to use based on mode
+if [[ "$MODE" == "prod" ]]; then
+    ENV_FILE=".env.production"
+else
+    ENV_FILE=".env"
+fi
+
+# Check for .env file (dev mode needs .env, prod mode needs .env.production)
+if [[ "$MODE" == "dev" ]] && [[ ! -f ".env" ]]; then
+    echo -e "${YELLOW}No .env file found!${NC}"
+    echo -e "Creating .env from .env.example..."
+    if [[ -f ".env.example" ]]; then
+        cp .env.example .env
+        echo -e "${GREEN}Created .env file${NC}"
+        if [[ "$NO_AUTH" != "true" ]]; then
+            echo -e "${YELLOW}Please edit .env and set your Authentik secrets:${NC}"
+            echo -e "  - AUTHENTIK_SECRET_KEY"
+            echo -e "  - AUTHENTIK_PG_PASS"
+            echo ""
+        fi
+    else
+        echo -e "${RED}.env.example not found. Cannot continue.${NC}"
+        exit 1
+    fi
+elif [[ "$MODE" == "prod" ]] && [[ ! -f ".env.production" ]]; then
+    echo -e "${RED}No .env.production file found!${NC}"
+    echo -e "${YELLOW}Production mode requires .env.production file.${NC}"
+    echo -e "Create it from .env.production.example and configure production values:"
+    echo -e "  cp .env.production.example .env.production"
+    echo -e "  # Then edit .env.production with your production settings"
+    exit 1
+fi
+
+# Load environment variables from the appropriate .env file
+set -a
+source "$ENV_FILE"
+set +a
+
+FRONTEND_PORT=${FRONTEND_PORT:-6166}
+BACKEND_PORT=${BACKEND_PORT:-6616}
+AUTHENTIK_PORT_HTTP=${AUTHENTIK_PORT_HTTP:-9000}
+TYPEDB_HTTP_PORT=${TYPEDB_HTTP_PORT:-1728}
+
+# Create required directories for Authentik
+if [[ "$NO_AUTH" != "true" ]]; then
+    mkdir -p authentik/media authentik/templates authentik/certs
+fi
+
+# Show service URLs
+echo ""
+echo -e "${GREEN}=======================================================${NC}"
+echo -e "${GREEN}  K-BAAS-2 Services${NC}"
+echo -e "${GREEN}=======================================================${NC}"
+echo ""
+echo -e "  Frontend:      ${BLUE}http://localhost:${FRONTEND_PORT}${NC}"
+echo -e "  Backend API:   ${BLUE}http://localhost:${BACKEND_PORT}${NC}"
+if [[ "$NO_AUTH" != "true" ]]; then
+    echo -e "  Authentik:     ${BLUE}http://localhost:${AUTHENTIK_PORT_HTTP}${NC}"
+fi
+echo -e "  TypeDB HTTP:   ${BLUE}http://localhost:${TYPEDB_HTTP_PORT}${NC}"
+echo ""
+if [[ "$NO_AUTH" != "true" ]]; then
+    echo -e "${YELLOW}First time setup? Visit Authentik to create admin user:${NC}"
+    echo -e "${BLUE}http://localhost:${AUTHENTIK_PORT_HTTP}/if/flow/initial-setup/${NC}"
+    echo ""
+fi
+
+# Run docker compose commands
+if [[ "$RESET_ARG" == "reset" ]]; then
+    echo -e "${YELLOW}Resetting K-BAAS-2 services...${NC}"
+    echo -e "Stopping and removing containers, networks, and volumes (including Authentik)..."
+    # Use ALL_COMPOSE_FILES for reset to ensure complete cleanup regardless of --no-auth flag
+    docker compose $ALL_COMPOSE_FILES down --volumes --remove-orphans
+    echo -e "Building images and starting services..."
+    if [[ "$ATTACHED" == "true" ]]; then
+        docker compose $COMPOSE_FILES up --build
+    else
+        docker compose $COMPOSE_FILES up -d --build
+    fi
+else
+    echo -e "${GREEN}Starting K-BAAS-2 services...${NC}"
+    if [[ "$ATTACHED" == "true" ]]; then
+        # Non-detached mode - run in foreground
+        echo -e "${YELLOW}Running in attached mode. Press Ctrl+C to stop all containers.${NC}"
+        echo ""
+        docker compose $COMPOSE_FILES up
+    else
+        # Detached mode - run in background
+        docker compose $COMPOSE_FILES up -d
+    fi
+fi
+
+# Only show the remaining output for detached mode
+if [[ "$ATTACHED" != "true" ]]; then
+    echo ""
+    echo -e "${BLUE}Waiting for services to initialize (10 seconds)...${NC}"
+    sleep 10
+
+    # Open browser
+    URL="http://localhost:${FRONTEND_PORT}"
+    echo -e "${BLUE}Opening browser to ${URL}...${NC}"
+    if command -v xdg-open &> /dev/null; then
+        xdg-open "$URL" 2>/dev/null &
+    elif command -v open &> /dev/null; then
+        open "$URL" 2>/dev/null &
+    else
+        echo -e "${YELLOW}Could not auto-open browser. Please open ${URL} manually.${NC}"
+    fi
+
+    echo ""
+    echo -e "${GREEN}Showing logs for backend and frontend...${NC}"
+    echo -e "${YELLOW}Press Ctrl+C to stop log streaming (containers will keep running)${NC}"
+    echo ""
+
+    docker compose $COMPOSE_FILES logs -f backend frontend --tail 20
+fi

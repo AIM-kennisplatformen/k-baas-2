@@ -115,4 +115,21 @@ coverage/
 *.local
 
 # TypeScript
-*.tsbuildinfo 
+*.tsbuildinfo
+
+# Docker / Container runtime
+# Authentik stores runtime data in these directories
+authentik/media/
+authentik/templates/
+authentik/certs/
+
+# TypeDB data directory (local development)
+typedb-data/
+
+# Docker reference documentation (not part of project)
+docker-setup-reference.md
+
+# Keep example files committed (templates without secrets)
+# but ignore .env and .env.production (contain secrets)
+!.env.example
+!.env.production.example

@@ -64,10 +64,31 @@ log "TypeDB Server is up and running."
 sleep 2
 
 ADMIN_USER="admin"
+FORCE_REINIT="${FORCE_REINIT:-false}"
 
-# Step 2: Check if user 'admin' can log into the database with the password from .env.
+# Validate required environment variables and report missing ones
+MISSING_VARS=""
 if [ -z "$ADMIN_PASSWORD" ]; then
-    log "Skipping initialization: ADMIN_PASSWORD environment variable is not set or empty."
+    MISSING_VARS="$MISSING_VARS ADMIN_PASSWORD"
+fi
+if [ -z "$DATABASE_NAME" ]; then
+    MISSING_VARS="$MISSING_VARS DATABASE_NAME"
+fi
+if [ -z "$DATABASE_USER_NAME" ]; then
+    MISSING_VARS="$MISSING_VARS DATABASE_USER_NAME"
+fi
+if [ -z "$DATABASE_USER_PASSWORD" ]; then
+    MISSING_VARS="$MISSING_VARS DATABASE_USER_PASSWORD"
+fi
+
+if [ -n "$MISSING_VARS" ]; then
+    log "ERROR: Required environment variables are not set or empty:$MISSING_VARS"
+    log "Please ensure these are set in your .env file:"
+    log "  - TYPEDB_ADMIN_PASSWORD (maps to ADMIN_PASSWORD)"
+    log "  - TYPEDB_DATABASE_NAME (maps to DATABASE_NAME)"
+    log "  - TYPEDB_USER_NAME (maps to DATABASE_USER_NAME)"
+    log "  - TYPEDB_USER_PASSWORD (maps to DATABASE_USER_PASSWORD)"
+    log "TypeDB server will continue running but database initialization was skipped."
     wait $SERVER_PID
     exit 0
 fi
@@ -75,39 +96,55 @@ fi
 log "Step 2: Checking if user '$ADMIN_USER' can log into the database with the provided password..."
 
 # Attempt to list users to check authentication
+ADMIN_AUTH_OK=false
 if echo "user list" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled > /dev/null 2>&1; then
     log "Success: User '$ADMIN_USER' can log in with the provided password."
-    log "Skipping initialization steps (3-6)."
-    wait $SERVER_PID
-    exit 0
+    ADMIN_AUTH_OK=true
 fi
 
-log "Info: User '$ADMIN_USER' cannot log in with the provided password. Proceeding with initialization."
+if [ "$ADMIN_AUTH_OK" = "false" ]; then
+    log "Info: User '$ADMIN_USER' cannot log in with the provided password. Proceeding with password update."
 
-# Step 3: Change default admin password
-log "Step 3: Changing default admin password..."
-# Try with default password 'password'
-if ! echo "user update-password $ADMIN_USER $ADMIN_PASSWORD" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "password" --tls-disabled; then
-    log "Error: Failed to update admin password. Default password might not be 'password' or server is unreachable."
-    exit 1
-fi
-log "Success: Admin password updated."
-
-# Step 4: Create database
-if [ -z "$DATABASE_NAME" ]; then
-    log "Skipping Step 4 (Create Database) and subsequent steps: DATABASE_NAME is not set."
-    wait $SERVER_PID
-    exit 0
+    # Step 3: Change default admin password
+    log "Step 3: Changing default admin password..."
+    # Try with default password 'password'
+    if ! echo "user update-password $ADMIN_USER $ADMIN_PASSWORD" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "password" --tls-disabled; then
+        log "Error: Failed to update admin password. Default password might not be 'password' or server is unreachable."
+        exit 1
+    fi
+    log "Success: Admin password updated."
 fi
 
-log "Step 4: Creating database '$DATABASE_NAME'..."
-if ! echo "database create $DATABASE_NAME" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled; then
-    log "Error: Failed to create database '$DATABASE_NAME'."
-    exit 1
-fi
-log "Success: Database '$DATABASE_NAME' created."
+# Step 4: Check if database exists and create if needed
+# (DATABASE_NAME is already validated above, but keep this for safety)
 
-# Step 5: Install schema
+# Check if database already exists
+DATABASE_EXISTS=false
+if echo "database list" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled 2>&1 | grep -q "$DATABASE_NAME"; then
+    log "Database '$DATABASE_NAME' already exists."
+    DATABASE_EXISTS=true
+fi
+
+if [ "$DATABASE_EXISTS" = "true" ] && [ "$FORCE_REINIT" = "true" ]; then
+    log "FORCE_REINIT is set. Deleting existing database '$DATABASE_NAME'..."
+    if ! echo "database delete $DATABASE_NAME" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled; then
+        log "Warning: Failed to delete database '$DATABASE_NAME'. Continuing anyway."
+    fi
+    DATABASE_EXISTS=false
+fi
+
+if [ "$DATABASE_EXISTS" = "false" ]; then
+    log "Step 4: Creating database '$DATABASE_NAME'..."
+    if ! echo "database create $DATABASE_NAME" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled; then
+        log "Error: Failed to create database '$DATABASE_NAME'."
+        exit 1
+    fi
+    log "Success: Database '$DATABASE_NAME' created."
+else
+    log "Skipping database creation (already exists). Set FORCE_REINIT=true to recreate."
+fi
+
+# Step 5: Install schema (only if database was just created or FORCE_REINIT)
 if [ -z "$SCHEMA_NAME" ]; then
     log "Skipping Step 5 (Install Schema) and subsequent steps: SCHEMA_NAME is not set."
     wait $SERVER_PID
@@ -115,21 +152,25 @@ if [ -z "$SCHEMA_NAME" ]; then
 fi
 
 SCHEMA_FILE="/schema/${SCHEMA_NAME}"
-log "Step 5: Installing schema from $SCHEMA_FILE..."
-if [ ! -f "$SCHEMA_FILE" ]; then
-    log "Error: Schema file '$SCHEMA_FILE' not found."
-    exit 1
+if [ "$DATABASE_EXISTS" = "false" ] || [ "$FORCE_REINIT" = "true" ]; then
+    log "Step 5: Installing schema from $SCHEMA_FILE..."
+    if [ ! -f "$SCHEMA_FILE" ]; then
+        log "Error: Schema file '$SCHEMA_FILE' not found."
+        exit 1
+    fi
+
+    # Use TypeDB Console's 'source' command to load schema from file
+    # This allows TypeDB's parser to handle the file content properly (including blank lines)
+    if ! echo -e "transaction schema $DATABASE_NAME\nsource $SCHEMA_FILE\ncommit" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled; then
+        log "Error: Failed to install schema."
+        exit 1
+    fi
+    log "Success: Schema installed."
+else
+    log "Skipping schema installation (database already exists). Set FORCE_REINIT=true to reinstall."
 fi
 
-# Read schema file content, strip empty lines (including tabs/CR), and pipe it into the transaction
-SCHEMA_CONTENT=$(sed '/^[ \t\r]*$/d' "$SCHEMA_FILE")
-if ! echo -e "transaction schema $DATABASE_NAME\n$SCHEMA_CONTENT\n\n\ncommit" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled; then
-    log "Error: Failed to install schema."
-    exit 1
-fi
-log "Success: Schema installed."
-
-# Step 6: Install seed data
+# Step 6: Install seed data (only if database was just created or FORCE_REINIT)
 if [ -z "$SEED_NAME" ]; then
     log "Skipping Step 6 (Install Seed Data): SEED_NAME is not set."
     wait $SERVER_PID
@@ -137,19 +178,23 @@ if [ -z "$SEED_NAME" ]; then
 fi
 
 SEED_FILE="/schema/${SEED_NAME}"
-log "Step 6: Installing seed data from $SEED_FILE..."
-if [ ! -f "$SEED_FILE" ]; then
-    log "Error: Seed file '$SEED_FILE' not found."
-    exit 1
-fi
+if [ "$DATABASE_EXISTS" = "false" ] || [ "$FORCE_REINIT" = "true" ]; then
+    log "Step 6: Installing seed data from $SEED_FILE..."
+    if [ ! -f "$SEED_FILE" ]; then
+        log "Error: Seed file '$SEED_FILE' not found."
+        exit 1
+    fi
 
-# Read seed file content, strip empty lines (including tabs/CR), and pipe it into the transaction
-SEED_CONTENT=$(sed '/^[ \t\r]*$/d' "$SEED_FILE")
-if ! echo -e "transaction write $DATABASE_NAME\n$SEED_CONTENT\n\n\ncommit" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled; then
-    log "Error: Failed to install seed data."
-    exit 1
+    # Use TypeDB Console's 'source' command to load seed data from file
+    # This allows TypeDB's parser to handle the file content properly (including blank lines)
+    if ! echo -e "transaction write $DATABASE_NAME\nsource $SEED_FILE\ncommit" | "$TYPEDB_CONSOLE_BIN" console --address localhost:1729 --username "$ADMIN_USER" --password "$ADMIN_PASSWORD" --tls-disabled; then
+        log "Error: Failed to install seed data."
+        exit 1
+    fi
+    log "Success: Seed data installed."
+else
+    log "Skipping seed data installation (database already exists). Set FORCE_REINIT=true to reinstall."
 fi
-log "Success: Seed data installed."
 
 log "Initialization script finished. Keeping TypeDB Server running..."
 # Wait for the server process to exit (which it shouldn't unless stopped)
