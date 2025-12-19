@@ -240,86 +240,147 @@ This document provides detailed user stories, acceptance criteria, and deliverab
 
 ## Epic 2: User Authentication & Management (V0.7-V3)
 
-**Epic Goal:** Implement a secure and user-friendly authentication system with team-based access control.
+**Epic Goal:** Implement a secure and user-friendly authentication system using Authentik as the self-hosted identity provider, with team-based access control via Authentik groups.
 
-### Story 2.1: User Registration (V0.7)
+### Story 2.1: Authentik Infrastructure Setup (V0.7)
+**As a developer, I want Authentik configured and running via Docker Compose so that I have a production-ready identity provider for K-BAAS-2.**
+
+#### Acceptance Criteria:
+- Authentik services (server, worker, PostgreSQL, Redis) are defined in Docker Compose
+- Environment variables are documented with secure defaults
+- Authentik admin interface is accessible at configured port (default 9000)
+- Initial admin account setup is documented
+- OAuth2/OIDC provider is created for K-BAAS-2 application
+- Signing keys are configured for asymmetric JWT signing (RS256)
+- JWKS endpoint is accessible for token validation
+
+#### Deliverables:
+- Authentik Docker Compose service definitions
+- Environment variable template (.env.example) with required secrets
+- OAuth2 Provider configuration for K-BAAS-2
+- Application configuration linking provider to K-BAAS-2
+- Setup documentation for initial Authentik configuration
+
+### Story 2.2: User Registration via Authentik (V0.7)
 **As a domain expert, I want to register for an account so that I can access the knowledge graph wiki tool.**
 
 #### Acceptance Criteria:
-- Authentik identity provider is configured and running via Docker Compose
-- Self-service registration flow is enabled in Authentik
-- Registration form accepts email and password via Authentik UI
-- Input validation prevents invalid data
-- User data is stored securely in Authentik
-- Registration process provides clear feedback
-- Email verification flow is configured
+- Self-service enrollment flow is enabled in Authentik
+- Registration collects email, password, and display name via Authentik UI
+- Email verification stage sends confirmation link
+- Input validation prevents invalid data (password strength, email format)
+- User data is stored securely in Authentik database
+- Registration process provides clear feedback at each stage
+- New users are automatically assigned default group (kb-viewer)
 
 #### Deliverables:
-- Authentik Docker Compose configuration
-- Authentik OAuth2/OIDC provider for K-BAAS-2 application
-- Self-service enrollment flow configuration
-- FastAPI integration with Authentik (JWT validation via JWKS)
-- User registration via Authentik flows
+- Authentik enrollment flow configuration (identification → email verification → prompt → user write → login stages)
+- Default group assignment policy
+- Email template customization for verification
+- Registration error handling and user feedback
 
-### Story 2.2: User Authentication (V0.7)
+### Story 2.3: User Authentication via Authentik (V0.7)
 **As a domain expert, I want to log in to my account so that I can access my knowledge bases.**
 
 #### Acceptance Criteria:
-- Login form authenticates users with email/password
-- JWT tokens are generated and managed securely
-- Authentication state is maintained across sessions
-- Login process provides appropriate error messages
+- Frontend redirects to Authentik login page for authentication
+- Authentik issues JWT tokens (access + refresh) upon successful login
+- Access tokens are validated by FastAPI via JWKS endpoint
+- Refresh tokens enable silent token renewal (offline_access scope)
+- Token claims include user identity, email, and group membership
+- Authentication state is maintained across browser sessions
+- Logout properly revokes tokens and clears session
 
 #### Deliverables:
-- Login form UI
-- JWT-based authentication system
-- Token management system
-- Authentication state management
+- Frontend OIDC client integration (oidc-client-ts or similar)
+- FastAPI JWT validation via fastapi-oidc library
+- Token storage and refresh mechanism
+- Login/logout UI components
+- Authentication state management (Jotai atoms)
 
-### Story 2.3: Team Management (V1)
-**As a domain expert, I want to create and manage teams so that I can collaborate with others.**
+### Story 2.4: Social Login Integration (V0.7)
+**As a domain expert, I want to log in using my Google or GitHub account so that I can access the tool without creating a new password.**
 
 #### Acceptance Criteria:
-- Users can create new teams
-- Team creators can invite other users
-- Team membership can be managed
-- Users can belong to multiple teams
+- Google OAuth source is configured in Authentik
+- GitHub OAuth source is configured in Authentik
+- Social login options appear on Authentik login page
+- Social accounts are linked to user profiles automatically
+- Users can link/unlink social accounts from their profile
+- First-time social login triggers enrollment flow for additional info
 
 #### Deliverables:
-- Team creation interface
-- User invitation system
-- Team management dashboard
-- Team membership management
+- Authentik Google OAuth source configuration
+- Authentik GitHub OAuth source configuration
+- Social login enrollment flow integration
+- Account linking configuration in Authentik
 
-### Story 2.4: Role-based Permissions (V3)
-**As a team administrator, I want to manage permissions for team members so that I can control access to knowledge bases.**
+### Story 2.5: Role-Based Access Control via Authentik Groups (V0.7)
+**As a developer, I want Authentik groups mapped to application roles so that I can enforce permissions in the FastAPI backend.**
 
 #### Acceptance Criteria:
-- Team administrators can assign roles to team members
-- Different roles have appropriate access levels
+- Authentik groups are created: kb-admin, kb-editor, kb-viewer
+- Group membership is included in JWT token claims
+- FastAPI dependencies validate group membership for protected endpoints
+- Permission hierarchy is enforced (admin > editor > viewer)
+- Access denied responses include appropriate error messages
+- Group changes in Authentik are reflected on next token refresh
+
+#### Deliverables:
+- Authentik group structure (kb-admin, kb-editor, kb-viewer)
+- FastAPI auth dependencies (get_current_user, require_role)
+- Permission checking utilities
+- RBAC documentation
+
+### Story 2.6: Team Management via Authentik (V1)
+**As a domain expert, I want to create and manage teams so that I can collaborate with others on knowledge bases.**
+
+#### Acceptance Criteria:
+- Teams are represented as Authentik groups with naming convention (team-{team_id})
+- Team creators are assigned team admin role within the group
+- Team admins can invite users via Authentik invitation flow
+- Users can belong to multiple teams (multiple group memberships)
+- Team membership is visible in user profile
+- Team changes sync to application via token claims
+
+#### Deliverables:
+- Team-to-group mapping in Authentik
+- Team creation API endpoint (creates Authentik group)
+- User invitation system via Authentik
+- Team management UI
+- Team membership synchronization
+
+### Story 2.7: Knowledge Base Access Control (V1)
+**As a team administrator, I want to control which teams can access specific knowledge bases so that I can manage data privacy.**
+
+#### Acceptance Criteria:
+- Knowledge bases can be assigned to one or more teams
+- Per-KB ownership tracked via dynamic groups (kb-owner:{kb_id})
+- Only team members with appropriate roles can access assigned KBs
+- KB access permissions are checked on every API request
 - Permission changes are reflected immediately
-- Users receive appropriate feedback when access is denied
 
 #### Deliverables:
-- Permission management interface
-- Role-based access control system
-- Permission checking mechanisms
-- Access denied user feedback
+- KB-team association in core database
+- Dynamic group creation for KB ownership
+- Access control middleware for KB endpoints
+- Permission checking utilities
 
-### Story 2.5: Invitation-based Access Levels (V2)
+### Story 2.8: Invitation-based Access Levels (V2)
 **As a domain expert, I want to invite external analysts with limited permissions so that they can contribute without full editing access.**
 
 #### Acceptance Criteria:
-- Knowledge base owners can invite external users with specific permission levels
+- KB owners can generate invitation links with specific permission levels
+- Invitations specify viewer, commenter, or editor access
 - Invited users receive clear information about their access level
-- Different invitation types support different contribution models
-- Invitation system integrates with existing team management
+- Invitation expiration is configurable
+- Accepted invitations create appropriate Authentik group membership
 
 #### Deliverables:
-- External user invitation system
-- Permission level specification interface
-- Invitation workflow management
-- Access level communication system
+- Invitation link generation system
+- Permission level selection interface
+- Invitation acceptance flow via Authentik
+- Invitation management dashboard
 
 ---
 
@@ -989,7 +1050,7 @@ This document provides a comprehensive breakdown of all user stories, acceptance
 
 **Total Coverage:**
 - 12 Epics (including new Epic 0.5 for Core Interface and Epic 12 for User Experience)
-- 58 User Stories (24 new stories added to address gaps from PRD analysis and Epic 1 breakdown)
+- 61 User Stories (expanded Epic 2 with 8 Authentik-focused stories)
 - Comprehensive acceptance criteria for each story
 - User-facing deliverables aligned with MVP and post-MVP requirements
 - Complete coverage of viewer/analyst user journey
@@ -997,8 +1058,8 @@ This document provides a comprehensive breakdown of all user stories, acceptance
 
 **Epic Breakdown:**
 - Epic 0.5: Core Interface & Synchronization (2 stories)
-- Epic 1: Project Foundation & Infrastructure (12 stories) 
-- Epic 2: User Authentication & Management (5 stories)
+- Epic 1: Project Foundation & Infrastructure (12 stories)
+- Epic 2: User Authentication & Management (8 stories) - Authentik integration
 - Epic 3: Knowledge Base Creation & Schema Management (4 stories)
 - Epic 4: Wiki Content Management (4 stories)
 - Epic 5: Knowledge Graph Visualization & Editing (4 stories)
@@ -1011,10 +1072,10 @@ This document provides a comprehensive breakdown of all user stories, acceptance
 - Epic 12: User Experience & Accessibility (8 stories)
 
 **Version Distribution:**
-- V0.7 (MVP): 21 stories
-- V1: 26 stories
+- V0.7 (MVP): 25 stories (includes 5 Authentik stories)
+- V1: 25 stories
 - V2: 5 stories
-- V3: 2 stories
+- V3: 2 stories (removed - RBAC now in V0.7 via Authentik)
 
 **Key Additions from PRD Analysis:**
 - ✅ Split-view interface (core feature)

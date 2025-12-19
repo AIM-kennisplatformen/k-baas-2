@@ -22,6 +22,7 @@ PROJECT_ROOT=""
 PROJECT_ID=""
 PROJECT_NUMBER=""
 STATUS_FIELD_ID=""
+BACKLOG_OPTION_ID=""
 
 #=============================================================================
 # UTILITY FUNCTIONS
@@ -35,26 +36,58 @@ USAGE:
     ${SCRIPT_NAME} <command> [options]
 
 COMMANDS:
-    create-epic <title> <body> <epic_slug>   Create epic issue
-    create-story <epic_num> <title> <body> <epic_slug> <story_slug>  Create story issue
-    create-task <story_num> <title> <body> <epic_slug> <story_slug> Create task issue
-    update-status <issue_num> <status>      Update issue status
-    list-stories [filter]                   List stories (default: "label:story state:open")
-    migrate-stories                          Migrate Markdown stories to issues
-    get-story-context <issue_num>           Get comprehensive context for a user story
-    help                                     Show this help message
-    version                                  Show version information
+    create-epic <title> <body> <epic_slug>
+        Create epic issue with required slug for labeling.
+
+    create-story <title> <body> <story_slug> [--epic <epic_num> <epic_slug>]
+        Create story issue. Story slug is always required.
+        Use --epic to link to a parent epic (requires both epic number and slug).
+
+    create-task <title> <body> [--story <story_num> <story_slug>] [--epic-slug <epic_slug>]
+        Create task issue. Use --story to link to a parent story.
+        Use --epic-slug to add epic label without linking.
+
+    update-status <issue_num> <status>
+        Update issue status on project board.
+
+    list-stories [filter]
+        List stories (default: "label:story state:open")
+
+    migrate-stories
+        Migrate Markdown stories to GitHub issues.
+
+    get-story-context <issue_num>
+        Get comprehensive context for a user story.
+
+    help                Show this help message
+    version             Show version information
 
 EXAMPLES:
+    # Create an epic
     ${SCRIPT_NAME} create-epic "Epic 1: Foundation" "Setup basic infrastructure" "foundation"
-    ${SCRIPT_NAME} create-story 15 "User Auth" "As a user I want to login" "foundation" "user-auth"
-    ${SCRIPT_NAME} create-task 16 "Login form validation" "Implement client-side validation" "foundation" "user-auth"
+
+    # Create a story linked to an epic
+    ${SCRIPT_NAME} create-story "User Auth" "As a user I want to login" "user-auth" --epic 15 "foundation"
+
+    # Create a standalone story (no epic)
+    ${SCRIPT_NAME} create-story "Bug Fix" "Fix login timeout issue" "login-fix"
+
+    # Create a task linked to a story
+    ${SCRIPT_NAME} create-task "Login form validation" "Implement client-side validation" --story 16 "user-auth"
+
+    # Create a task with epic label only (no story link)
+    ${SCRIPT_NAME} create-task "Setup CI pipeline" "Configure GitHub Actions" --epic-slug "foundation"
+
+    # Create a standalone task
+    ${SCRIPT_NAME} create-task "Quick fix" "Patch security issue"
+
+    # Other commands
     ${SCRIPT_NAME} update-status 42 "In Progress"
     ${SCRIPT_NAME} list-stories
     ${SCRIPT_NAME} migrate-stories
     ${SCRIPT_NAME} get-story-context 42
 
-For detailed usage examples, see: README.md
+For detailed usage examples, see: README github-issue-manager.md
 Slug creation tips: derive from title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
 EOF
 }
@@ -87,6 +120,64 @@ output_json() {
 output_error() {
     echo "{\"error\": \"$1\"}" >&2
     exit 1
+}
+
+# Cache for existing labels to avoid redundant API calls (bash 3.x compatible)
+# Uses a newline-separated string instead of associative arrays
+LABEL_CACHE=""
+
+# Check if label exists (uses cache)
+label_exists() {
+    local label_name="$1"
+
+    # Check cache first (grep for exact match with delimiters)
+    if echo "$LABEL_CACHE" | grep -qFx "$label_name"; then
+        return 0
+    fi
+
+    # Query GitHub API
+    if gh label list --repo "$REPO" --json name 2>/dev/null | jq -e --arg name "$label_name" '.[] | select(.name == $name)' >/dev/null 2>&1; then
+        # Add to cache
+        LABEL_CACHE="${LABEL_CACHE}${label_name}"$'\n'
+        return 0
+    else
+        return 1
+    fi
+}
+
+# Validate that a slug is not purely numeric (common AI agent mistake)
+validate_slug() {
+    local slug="$1"
+    local slug_type="$2"  # "epic" or "story" for error messages
+    
+    # Allow empty slugs (they're handled elsewhere)
+    if [ -z "$slug" ]; then
+        return 0
+    fi
+    
+    # Reject purely numeric slugs - this is likely an issue number passed by mistake
+    if [[ "$slug" =~ ^[0-9]+$ ]]; then
+        log_warning "Invalid ${slug_type}_slug: '$slug' appears to be an issue number, not a semantic slug."
+        log_warning "Slugs should be descriptive (e.g., 'user-auth', 'foundation') not issue numbers."
+        log_warning "Check that you're passing the correct parameters to the script."
+        output_error "Invalid ${slug_type}_slug: '$slug'. Slugs must contain at least one letter or hyphen, not be purely numeric. Expected format: 'lowercase-hyphenated-slug'"
+    fi
+    
+    return 0
+}
+
+# Create label if it doesn't exist
+ensure_label() {
+    local label_name="$1"
+    local description="$2"
+    local color="$3"
+
+    if ! label_exists "$label_name"; then
+        if gh label create "$label_name" --description "$description" --color "$color" --repo "$REPO" 2>/dev/null; then
+            # Add to cache on successful creation
+            LABEL_CACHE="${LABEL_CACHE}${label_name}"$'\n'
+        fi
+    fi
 }
 
 check_dependencies() {
@@ -238,7 +329,34 @@ ensure_project_board() {
     if [ -z "$STATUS_FIELD_ID" ] || [ "$STATUS_FIELD_ID" = "null" ]; then
         output_error "Status field not found in project"
     fi
-    
+
+    # Get the Backlog option ID for setting initial status
+    BACKLOG_OPTION_ID=$(gh api graphql -f query='
+query($projectId: ID!) {
+  node(id: $projectId) {
+    ... on ProjectV2 {
+      fields(first: 20) {
+        nodes {
+          ... on ProjectV2SingleSelectField {
+            id
+            name
+            options {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+}' -f projectId="$PROJECT_ID" 2>/dev/null | jq -r '.data.node.fields.nodes[] | select(.name == "Status") | .options[] | select(.name == "Backlog") | .id // empty')
+
+    if [ -n "$BACKLOG_OPTION_ID" ] && [ "$BACKLOG_OPTION_ID" != "null" ]; then
+        log_info "Backlog option ID: $BACKLOG_OPTION_ID"
+    else
+        log_warning "Could not find Backlog option ID, status setting will be skipped"
+    fi
+
     # Link repository to project
     log_info "Linking repository to project..."
     gh project link "$PROJECT_NUMBER" --owner "$REPO_OWNER" --repo "$REPO" 2>/dev/null
@@ -259,14 +377,17 @@ create_epic_issue() {
         output_error "Usage: create-epic <title> <body> <epic_slug>"
     fi
     
+    # Validate slug is not purely numeric (common AI agent mistake - passing issue numbers as slugs)
+    validate_slug "$epic_slug" "epic"
+    
     if [ -z "$REPO" ]; then
         load_config
     fi
 
     ensure_project_board
-    
-    # Create epic label
-    gh label create "epic:$epic_slug" --description "Epic stories" --color "FFE66D" --repo "$REPO" 2>/dev/null || true
+
+    # Create epic label if it doesn't exist
+    ensure_label "epic:$epic_slug" "Epic stories" "1e3a8a"
 
     # Create issue and capture the issue number directly
     local issue_url=$(gh issue create --repo "$REPO" --title "$title" --body "$body" --label "epic,epic:$epic_slug")
@@ -279,37 +400,23 @@ create_epic_issue() {
         output_error "Failed to parse epic issue number"
     fi
     
-    # Create milestone for epic (check if exists first)
-    local milestone_num=$(gh api "repos/$REPO/milestones" | jq -r --arg title "$title" '[.[] | select(.title == $title)] | .[0].number // empty')
-    if [ -z "$milestone_num" ]; then
-        gh milestone create --title "$title" --repo "$REPO" >/dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            milestone_num=$(gh api "repos/$REPO/milestones" | jq -r --arg title "$title" '[.[] | select(.title == $title)] | .[0].number // empty')
-        else
-            log_warning "Milestone creation failed, continuing"
-        fi
-    fi
-    
-    if [ -n "$milestone_num" ]; then
-        gh issue edit "$epic_num" --milestone "$milestone_num" --repo "$REPO"
-        if [ $? -ne 0 ]; then
-            log_warning "Failed to assign milestone"
-        fi
-    fi
-    
     # Add to project and set status to Backlog
     log_info "Adding epic to project..."
     local add_response=$(gh project item-add "$PROJECT_NUMBER" --owner "$REPO_OWNER" --url "https://github.com/$REPO/issues/$epic_num" --format json 2>/dev/null)
-    
+
     if [ $? -eq 0 ] && [ -n "$add_response" ]; then
         local epic_item_id=$(echo "$add_response" | jq -r '.id // empty')
         if [ -n "$epic_item_id" ] && [ "$epic_item_id" != "null" ]; then
-            # Set status to Todo (equivalent to Backlog)
-            gh project item-edit --id "$epic_item_id" --project-id "$PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "Todo" 2>/dev/null
-            if [ $? -eq 0 ]; then
-                log_success "Epic added to project with Todo status"
+            # Set status to Backlog using the option ID
+            if [ -n "$BACKLOG_OPTION_ID" ] && [ "$BACKLOG_OPTION_ID" != "null" ]; then
+                gh project item-edit --id "$epic_item_id" --project-id "$PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$BACKLOG_OPTION_ID" 2>/dev/null
+                if [ $? -eq 0 ]; then
+                    log_success "Epic added to project with Backlog status"
+                else
+                    log_warning "Epic added to project but failed to set status"
+                fi
             else
-                log_warning "Epic added to project but failed to set status"
+                log_warning "Epic added to project (status not set - no Backlog option ID)"
             fi
         else
             log_warning "Epic added to project but failed to parse item ID"
@@ -317,19 +424,42 @@ create_epic_issue() {
     else
         log_warning "Failed to add epic to project, manual addition needed"
     fi
-    
+
     output_json "{\"epic_number\": $epic_num}"
 }
 
 create_story_issue() {
-    local epic_num="$1"
-    local title="$2"
-    local body="$3"
-    local epic_slug="$4"
-    local story_slug="$5"
+    # Parameters: title, body, story_slug, [epic_num], [epic_slug]
+    # epic_num and epic_slug are optional but must be provided together
+    local title="$1"
+    local body="$2"
+    local story_slug="$3"
+    local epic_num="$4"
+    local epic_slug="$5"
     
-    if [ -z "$epic_num" ] || [ -z "$title" ] || [ -z "$body" ] || [ -z "$epic_slug" ] || [ -z "$story_slug" ]; then
-        output_error "Usage: create-story <epic_num> <title> <body> <epic_slug> <story_slug>"
+    # Validate required parameters
+    if [ -z "$title" ] || [ -z "$body" ] || [ -z "$story_slug" ]; then
+        output_error "Usage: create-story <title> <body> <story_slug> [--epic <epic_num> <epic_slug>]"
+    fi
+    
+    # Validate slugs are not purely numeric (common AI agent mistake - passing issue numbers as slugs)
+    validate_slug "$story_slug" "story"
+    
+    # If epic_num is provided, epic_slug must also be provided (and vice versa)
+    if [ -n "$epic_num" ] && [ -z "$epic_slug" ]; then
+        output_error "When providing --epic, both <epic_num> and <epic_slug> are required"
+    fi
+    if [ -n "$epic_slug" ] && [ -z "$epic_num" ]; then
+        output_error "When providing --epic, both <epic_num> and <epic_slug> are required"
+    fi
+    
+    # Validate epic_num is numeric if provided
+    if [ -n "$epic_num" ] && ! [[ "$epic_num" =~ ^[0-9]+$ ]]; then
+        output_error "Invalid epic_num: $epic_num. Must be numeric."
+    fi
+    
+    if [ -n "$epic_slug" ]; then
+        validate_slug "$epic_slug" "epic"
     fi
     
     if [ -z "$REPO" ]; then
@@ -338,24 +468,22 @@ create_story_issue() {
 
     ensure_project_board
     
-    # Enhance body with parent epic reference (only if epic slug exists)
+    # Enhance body with parent epic reference (only if epic info provided)
     local enhanced_body="$body"
-    if [ -n "$epic_slug" ] && [ "$epic_slug" != "" ]; then
+    if [ -n "$epic_num" ] && [ -n "$epic_slug" ]; then
         enhanced_body="$body
 
 Parent Epic: $epic_slug (#$epic_num)"
     fi
     
-    # Create labels if slugs are not empty
+    # Create labels
     local labels="story"
-    if [ -n "$epic_slug" ] && [ "$epic_slug" != "" ]; then
-        gh label create "epic:$epic_slug" --description "Epic $epic_num stories" --color "FFE66D" --repo "$REPO" 2>/dev/null || true
+    if [ -n "$epic_slug" ]; then
+        ensure_label "epic:$epic_slug" "Epic $epic_num stories" "1e3a8a"
         labels="$labels,epic:$epic_slug"
     fi
-    if [ -n "$story_slug" ] && [ "$story_slug" != "" ]; then
-        gh label create "story:$story_slug" --description "Story $story_slug" --color "A2E4B8" --repo "$REPO" 2>/dev/null || true
-        labels="$labels,story:$story_slug"
-    fi
+    ensure_label "story:$story_slug" "Story $story_slug" "9017ca"
+    labels="$labels,story:$story_slug"
 
     # Create story issue and capture the issue number directly
     local issue_url=$(gh issue create --repo "$REPO" --title "$title" --body "$enhanced_body" --label "$labels")
@@ -368,39 +496,23 @@ Parent Epic: $epic_slug (#$epic_num)"
         output_error "Failed to parse story issue number"
     fi
     
-    # Assign to milestone if it exists - get epic title from epic issue
-    if [ -n "$epic_num" ] && [ "$epic_num" != "" ]; then
-        local epic_title=$(gh issue view "$epic_num" --repo "$REPO" --json title 2>/dev/null | jq -r '.title // empty')
-        if [ -n "$epic_title" ] && [ "$epic_title" != "null" ]; then
-            local milestone_num=$(gh api "repos/$REPO/milestones" | jq -r --arg epic_title "$epic_title" '[.[] | select(.title == $epic_title)] | .[0].number // empty')
-            if [ -n "$milestone_num" ]; then
-                gh issue edit "$story_num" --milestone "$milestone_num" --repo "$REPO"
-                if [ $? -ne 0 ]; then
-                    log_warning "Failed to assign milestone"
-                fi
-            else
-                log_warning "Epic milestone not found: $epic_title"
-            fi
-        else
-            log_warning "Could not get epic title for milestone assignment"
-        fi
-    else
-        log_info "No epic specified, skipping milestone assignment"
-    fi
-    
     # Add to project and set status to Backlog
     log_info "Adding story to project..."
     local add_response=$(gh project item-add "$PROJECT_NUMBER" --owner "$REPO_OWNER" --url "https://github.com/$REPO/issues/$story_num" --format json 2>/dev/null)
-    
+
     if [ $? -eq 0 ] && [ -n "$add_response" ]; then
         local story_item_id=$(echo "$add_response" | jq -r '.id // empty')
         if [ -n "$story_item_id" ] && [ "$story_item_id" != "null" ]; then
-            # Set status to Todo (equivalent to Backlog)
-            gh project item-edit --id "$story_item_id" --project-id "$PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "Todo" 2>/dev/null
-            if [ $? -eq 0 ]; then
-                log_success "Story added to project with Todo status"
+            # Set status to Backlog using the option ID
+            if [ -n "$BACKLOG_OPTION_ID" ] && [ "$BACKLOG_OPTION_ID" != "null" ]; then
+                gh project item-edit --id "$story_item_id" --project-id "$PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$BACKLOG_OPTION_ID" 2>/dev/null
+                if [ $? -eq 0 ]; then
+                    log_success "Story added to project with Backlog status"
+                else
+                    log_warning "Story added to project but failed to set status"
+                fi
             else
-                log_warning "Story added to project but failed to set status"
+                log_warning "Story added to project (status not set - no Backlog option ID)"
             fi
         else
             log_warning "Story added to project but failed to parse item ID"
@@ -408,9 +520,9 @@ Parent Epic: $epic_slug (#$epic_num)"
     else
         log_warning "Failed to add story to project, manual addition needed"
     fi
-    
-    # Create sub-issue relationship with epic (only if epic exists)
-    if [ -n "$epic_num" ] && [ "$epic_num" != "" ]; then
+
+    # Create sub-issue relationship with epic (only if epic_num exists)
+    if [ -n "$epic_num" ]; then
         create_sub_issue_relationship "$epic_num" "$story_num"
     fi
     
@@ -418,14 +530,38 @@ Parent Epic: $epic_slug (#$epic_num)"
 }
 
 create_task_issue() {
-    local story_num="$1"
-    local title="$2"
-    local body="$3"
-    local epic_slug="$4"
-    local story_slug="$5"
+    # Parameters: title, body, [story_num], [story_slug], [epic_slug]
+    # story_num and story_slug must be provided together if linking to a story
+    local title="$1"
+    local body="$2"
+    local story_num="$3"
+    local story_slug="$4"
+    local epic_slug="$5"
     
-    if [ -z "$story_num" ] || [ -z "$title" ] || [ -z "$body" ]; then
-        output_error "Usage: create-task <story_num> <title> <body> <epic_slug> <story_slug>"
+    # Validate required parameters
+    if [ -z "$title" ] || [ -z "$body" ]; then
+        output_error "Usage: create-task <title> <body> [--story <story_num> <story_slug>] [--epic-slug <epic_slug>]"
+    fi
+    
+    # If story_num is provided, story_slug must also be provided (and vice versa)
+    if [ -n "$story_num" ] && [ -z "$story_slug" ]; then
+        output_error "When providing --story, both <story_num> and <story_slug> are required"
+    fi
+    if [ -n "$story_slug" ] && [ -z "$story_num" ]; then
+        output_error "When providing --story, both <story_num> and <story_slug> are required"
+    fi
+    
+    # Validate story_num is numeric if provided
+    if [ -n "$story_num" ] && ! [[ "$story_num" =~ ^[0-9]+$ ]]; then
+        output_error "Invalid story_num: $story_num. Must be numeric."
+    fi
+    
+    # Validate slugs are not purely numeric (common AI agent mistake - passing issue numbers as slugs)
+    if [ -n "$epic_slug" ]; then
+        validate_slug "$epic_slug" "epic"
+    fi
+    if [ -n "$story_slug" ]; then
+        validate_slug "$story_slug" "story"
     fi
     
     if [ -z "$REPO" ]; then
@@ -434,33 +570,34 @@ create_task_issue() {
 
     ensure_project_board
     
-    # Enhance body with parent story reference
-    local enhanced_body="$body
+    # Build enhanced body
+    local enhanced_body="$body"
+    
+    # Add parent story reference if provided
+    if [ -n "$story_num" ]; then
+        enhanced_body="$enhanced_body
 
 Parent Story: #$story_num"
-    
-    # Add slug information only if slugs are not empty
-    if [ -n "$story_slug" ] && [ "$story_slug" != "" ]; then
-        enhanced_body="$enhanced_body
+        if [ -n "$story_slug" ]; then
+            enhanced_body="$enhanced_body
 Story Slug: $story_slug"
+        fi
     fi
     
-    if [ -n "$epic_slug" ] && [ "$epic_slug" != "" ]; then
+    # Add epic slug info if provided
+    if [ -n "$epic_slug" ]; then
         enhanced_body="$enhanced_body
 Epic Slug: $epic_slug"
     fi
 
-    # Create story-specific label if it doesn't exist
-    gh label create "story-$story_num" --description "Story #$story_num tasks" --color "A2E4B8" --repo "$REPO" 2>/dev/null || true
-    
-    # Create labels if slugs are not empty (analoog aan story issues)
-    local labels="task,story-$story_num"
-    if [ -n "$epic_slug" ] && [ "$epic_slug" != "" ]; then
-        gh label create "epic:$epic_slug" --description "Epic $epic_slug tasks" --color "FFE66D" --repo "$REPO" 2>/dev/null || true
+    # Create labels
+    local labels="task"
+    if [ -n "$epic_slug" ]; then
+        ensure_label "epic:$epic_slug" "Epic $epic_slug tasks" "1e3a8a"
         labels="$labels,epic:$epic_slug"
     fi
-    if [ -n "$story_slug" ] && [ "$story_slug" != "" ]; then
-        gh label create "story:$story_slug" --description "Story $story_slug tasks" --color "A2E4B8" --repo "$REPO" 2>/dev/null || true
+    if [ -n "$story_slug" ]; then
+        ensure_label "story:$story_slug" "Story $story_slug tasks" "9017ca"
         labels="$labels,story:$story_slug"
     fi
     
@@ -475,39 +612,23 @@ Epic Slug: $epic_slug"
         output_error "Failed to parse task issue number"
     fi
     
-    # Get milestone from parent story and assign to task
-    if [ -n "$story_num" ] && [ "$story_num" != "" ]; then
-        local parent_milestone=$(gh issue view "$story_num" --repo "$REPO" --json milestone 2>/dev/null | jq -r '.milestone.title // empty')
-        if [ -n "$parent_milestone" ] && [ "$parent_milestone" != "null" ]; then
-            local milestone_num=$(gh api "repos/$REPO/milestones" | jq -r --arg parent_milestone "$parent_milestone" '[.[] | select(.title == $parent_milestone)] | .[0].number // empty')
-            if [ -n "$milestone_num" ]; then
-                gh issue edit "$task_num" --milestone "$milestone_num" --repo "$REPO"
-                if [ $? -ne 0 ]; then
-                    log_warning "Failed to assign milestone"
-                fi
-            else
-                log_warning "Milestone not found: $parent_milestone"
-            fi
-        else
-            log_warning "Parent story has no milestone or could not retrieve it"
-        fi
-    else
-        log_warning "No parent story specified, skipping milestone assignment"
-    fi
-    
     # Add to project and set status to Backlog
     log_info "Adding task to project..."
     local add_response=$(gh project item-add "$PROJECT_NUMBER" --owner "$REPO_OWNER" --url "https://github.com/$REPO/issues/$task_num" --format json 2>/dev/null)
-    
+
     if [ $? -eq 0 ] && [ -n "$add_response" ]; then
         local task_item_id=$(echo "$add_response" | jq -r '.id // empty')
         if [ -n "$task_item_id" ] && [ "$task_item_id" != "null" ]; then
-            # Set status to Todo (equivalent to Backlog)
-            gh project item-edit --id "$task_item_id" --project-id "$PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "Todo" 2>/dev/null
-            if [ $? -eq 0 ]; then
-                log_success "Task added to project with Todo status"
+            # Set status to Backlog using the option ID
+            if [ -n "$BACKLOG_OPTION_ID" ] && [ "$BACKLOG_OPTION_ID" != "null" ]; then
+                gh project item-edit --id "$task_item_id" --project-id "$PROJECT_ID" --field-id "$STATUS_FIELD_ID" --single-select-option-id "$BACKLOG_OPTION_ID" 2>/dev/null
+                if [ $? -eq 0 ]; then
+                    log_success "Task added to project with Backlog status"
+                else
+                    log_warning "Task added to project but failed to set status"
+                fi
             else
-                log_warning "Task added to project but failed to set status"
+                log_warning "Task added to project (status not set - no Backlog option ID)"
             fi
         else
             log_warning "Task added to project but failed to parse item ID"
@@ -515,9 +636,9 @@ Epic Slug: $epic_slug"
     else
         log_warning "Failed to add task to project, manual addition needed"
     fi
-    
-    # Create sub-issue relationship with parent story (only if parent story exists)
-    if [ -n "$story_num" ] && [ "$story_num" != "" ]; then
+
+    # Create sub-issue relationship with parent story (only if story_num provided)
+    if [ -n "$story_num" ]; then
         create_sub_issue_relationship "$story_num" "$task_num"
     fi
     
@@ -1086,7 +1207,8 @@ $dev_notes
             # Generate slugs for migration
             local epic_slug="epic-$epic_num"
             local story_slug="story-$epic_num-$story_num"
-            local result=$(create_story_issue "$epic_issue_num" "$story_title" "$story_body" "$epic_slug" "$story_slug" 2>&1)
+            # Use new argument order: title, body, story_slug, epic_num, epic_slug
+            local result=$(create_story_issue "$story_title" "$story_body" "$story_slug" "$epic_issue_num" "$epic_slug" 2>&1)
             
             if echo "$result" | jq -e '.story_number' >/dev/null 2>&1; then
                 local story_issue_num=$(echo "$result" | jq -r '.story_number')
@@ -1125,6 +1247,94 @@ $dev_notes
 }
 
 #=============================================================================
+# ARGUMENT PARSING HELPERS
+#=============================================================================
+
+# Parse create-story arguments
+# Syntax: create-story <title> <body> <story_slug> [--epic <epic_num> <epic_slug>]
+parse_create_story_args() {
+    local title=""
+    local body=""
+    local story_slug=""
+    local epic_num=""
+    local epic_slug=""
+    
+    if [ $# -lt 3 ]; then
+        output_error "Usage: create-story <title> <body> <story_slug> [--epic <epic_num> <epic_slug>]"
+    fi
+    
+    title="$1"
+    body="$2"
+    story_slug="$3"
+    shift 3
+    
+    # Parse optional flags
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --epic)
+                if [ $# -lt 3 ]; then
+                    output_error "--epic requires two arguments: <epic_num> <epic_slug>"
+                fi
+                epic_num="$2"
+                epic_slug="$3"
+                shift 3
+                ;;
+            *)
+                output_error "Unknown option: $1"
+                ;;
+        esac
+    done
+    
+    # Call create_story_issue with parameter order: title, body, story_slug, epic_num, epic_slug
+    create_story_issue "$title" "$body" "$story_slug" "$epic_num" "$epic_slug"
+}
+
+# Parse create-task arguments
+# Syntax: create-task <title> <body> [--story <story_num> <story_slug>] [--epic-slug <epic_slug>]
+parse_create_task_args() {
+    local title=""
+    local body=""
+    local story_num=""
+    local story_slug=""
+    local epic_slug=""
+    
+    if [ $# -lt 2 ]; then
+        output_error "Usage: create-task <title> <body> [--story <story_num> <story_slug>] [--epic-slug <epic_slug>]"
+    fi
+    
+    title="$1"
+    body="$2"
+    shift 2
+    
+    # Parse optional flags
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --story)
+                if [ $# -lt 3 ]; then
+                    output_error "--story requires two arguments: <story_num> <story_slug>"
+                fi
+                story_num="$2"
+                story_slug="$3"
+                shift 3
+                ;;
+            --epic-slug)
+                if [ $# -lt 2 ]; then
+                    output_error "--epic-slug requires one argument: <epic_slug>"
+                fi
+                epic_slug="$2"
+                shift 2
+                ;;
+            *)
+                output_error "Unknown option: $1"
+                ;;
+        esac
+    done
+    
+    # Call create_task_issue with parameter order: title, body, story_num, story_slug, epic_slug
+    create_task_issue "$title" "$body" "$story_num" "$story_slug" "$epic_slug"
+}
+
+#=============================================================================
 # MAIN COMMAND HANDLER
 #=============================================================================
 
@@ -1145,16 +1355,10 @@ main() {
             create_epic_issue "$1" "$2" "$3"
             ;;
         "create-story")
-            if [ $# -lt 5 ]; then
-                output_error "Usage: create-story <epic_num> <title> <body> <epic_slug> <story_slug>"
-            fi
-            create_story_issue "$1" "$2" "$3" "$4" "$5"
+            parse_create_story_args "$@"
             ;;
         "create-task")
-            if [ $# -lt 3 ]; then
-                output_error "Usage: create-task <story_num> <title> <body> <epic_slug> <story_slug>"
-            fi
-            create_task_issue "$1" "$2" "$3" "$4" "$5"
+            parse_create_task_args "$@"
             ;;
         "update-status")
             if [ $# -lt 2 ]; then

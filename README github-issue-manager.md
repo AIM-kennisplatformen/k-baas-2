@@ -91,7 +91,7 @@ These commands require _slugs_: Derive from title, lowercase, hyphens instead of
 
 
 #### `create-epic`
-Create an epic issue with milestone and project board integration.
+Create an epic issue with project board integration. Stories become sub-issues of the epic.
 
 ```bash
 ./github-issue-manager.sh create-epic <title> <body> <epic_slug>
@@ -125,17 +125,34 @@ Complete user authentication system including:
 ```
 
 #### `create-story`
-Create a story issue as a sub-issue of an epic.
+Create a story issue, optionally linked to a parent epic.
 
 ```bash
-./github-issue-manager.sh create-story <epic_num> <title> <body> <epic_slug> <story_slug>
+./github-issue-manager.sh create-story <title> <body> <story_slug> [--epic <epic_num> <epic_slug>]
 ```
+
+**Parameters:**
+- `<title>`: Story title
+- `<body>`: Story description (supports markdown)
+- `<story_slug>`: Required slug for labeling the story
+- `--epic <epic_num> <epic_slug>`: Optional flag to link story to a parent epic
 
 **Examples:**
 
 ```bash
-# Create a user registration story
-./github-issue-manager.sh create-story 15 "User Registration" "
+# Create a standalone story (not linked to any epic)
+./github-issue-manager.sh create-story "Bug Fix: Login Timeout" "
+## Story
+As a user, I want the login timeout issue fixed so that I don't get logged out unexpectedly.
+
+## Acceptance Criteria
+- [ ] Session timeout extended to 24 hours
+- [ ] User is warned before session expiry
+- [ ] Active users are not logged out
+" "login-timeout-fix"
+
+# Create a story linked to an epic
+./github-issue-manager.sh create-story "User Registration" "
 ## Story
 As a new user, I want to register an account so that I can access the application.
 
@@ -152,10 +169,10 @@ As a new user, I want to register an account so that I can access the applicatio
 - Create user database schema
 - Setup email service integration
 - Add registration API endpoint
-" "authentication" "user-registration"
+" "user-registration" --epic 15 "authentication"
 
-# Create a login story
-./github-issue-manager.sh create-story 15 "User Login" "
+# Create a login story linked to epic #15
+./github-issue-manager.sh create-story "User Login" "
 ## Story
 As a registered user, I want to login to my account so that I can access my personal dashboard.
 
@@ -172,7 +189,7 @@ As a registered user, I want to login to my account so that I can access my pers
 - Setup session management
 - Add login API endpoint
 - Handle password reset flow
-" "authentication" "user-login"
+" "user-login" --epic 15 "authentication"
 ```
 
 **Output:**
@@ -181,17 +198,45 @@ As a registered user, I want to login to my account so that I can access my pers
 ```
 
 #### `create-task`
-Create a task issue as a sub-issue of a story.
+Create a task issue, optionally linked to a parent story and/or labeled with an epic.
 
 ```bash
-./github-issue-manager.sh create-task <story_num> <title> <body> <epic_slug> <story_slug>
+./github-issue-manager.sh create-task <title> <body> [--story <story_num> <story_slug>] [--epic-slug <epic_slug>]
 ```
+
+**Parameters:**
+- `<title>`: Task title
+- `<body>`: Task description (supports markdown)
+- `--story <story_num> <story_slug>`: Optional flag to link task to a parent story
+- `--epic-slug <epic_slug>`: Optional flag to add epic label without creating a sub-issue relationship
 
 **Examples:**
 
 ```bash
-# Create a UI task for user registration
-./github-issue-manager.sh create-task 16 "Create Registration Form UI" "
+# Create a standalone task (not linked to any story or epic)
+./github-issue-manager.sh create-task "Quick security patch" "
+## Task Description
+Apply urgent security patch to address vulnerability CVE-2024-1234.
+
+## Requirements
+- Update dependency to latest version
+- Test for regressions
+- Deploy to production
+"
+
+# Create a task with epic label only (good for cross-cutting concerns)
+./github-issue-manager.sh create-task "Setup CI/CD Pipeline" "
+## Task Description
+Configure GitHub Actions for automated testing and deployment.
+
+## Requirements
+- Build pipeline
+- Test automation
+- Deploy to staging environment
+" --epic-slug "foundation"
+
+# Create a task linked to a parent story
+./github-issue-manager.sh create-task "Create Registration Form UI" "
 ## Task Description
 Design and implement the user registration form with proper validation and user experience.
 
@@ -208,10 +253,10 @@ Design and implement the user registration form with proper validation and user 
 - [ ] Form submission shows loading state
 - [ ] Error messages are user-friendly
 - [ ] Form is accessible (ARIA labels)
-" "authentication" "user-registration"
+" --story 16 "user-registration"
 
-# Create an API task
-./github-issue-manager.sh create-task 16 "Implement Registration API Endpoint" "
+# Create a task with both story link and epic label
+./github-issue-manager.sh create-task "Implement Registration API Endpoint" "
 ## Task Description
 Create secure API endpoint for user registration with proper validation and error handling.
 
@@ -228,7 +273,7 @@ Create secure API endpoint for user registration with proper validation and erro
 - [ ] Passwords are securely hashed
 - [ ] Duplicate email handling
 - [ ] API documentation updated
-" "authentication" "user-registration"
+" --story 16 "user-registration" --epic-slug "authentication"
 ```
 
 **Output:**
@@ -316,11 +361,7 @@ List stories with optional filtering.
       {"name": "epic:authentication"},
       {"name": "story:user-registration"}
     ],
-    "assignees": [],
-    "milestone": {
-      "title": "Epic 2: User Authentication",
-      "number": 2
-    }
+    "assignees": []
   },
   {
     "_metadata": {
@@ -433,8 +474,8 @@ This epic covers all data-related functionality including:
 EPIC_NUM=$(echo "$EPIC_RESULT" | jq -r '.epic_number')
 echo "Created Epic #$EPIC_NUM"
 
-# 2. Create stories for the epic
-STORY1_RESULT=$(./github-issue-manager.sh create-story $EPIC_NUM "Database Schema Design" "
+# 2. Create stories for the epic (using new syntax)
+STORY1_RESULT=$(./github-issue-manager.sh create-story "Database Schema Design" "
 ## Story
 As a developer, I want a well-designed database schema so that data is properly organized and performant.
 
@@ -443,24 +484,54 @@ As a developer, I want a well-designed database schema so that data is properly 
 - [ ] Primary and foreign keys defined
 - [ ] Indexes planned for performance
 - [ ] Migration scripts prepared
-" "data-management" "db-schema-design")
+" "db-schema-design" --epic $EPIC_NUM "data-management")
 
 STORY1_NUM=$(echo "$STORY1_RESULT" | jq -r '.story_number')
 echo "Created Story #$STORY1_NUM"
 
-# 3. Create tasks for the story
-./github-issue-manager.sh create-task $STORY1_NUM "Create ER Diagram" "
+# 3. Create tasks for the story (using new syntax)
+./github-issue-manager.sh create-task "Create ER Diagram" "
 Design entity relationship diagram showing all tables, relationships, and constraints.
-" "data-management" "db-schema-design"
+" --story $STORY1_NUM "db-schema-design" --epic-slug "data-management"
 
-./github-issue-manager.sh create-task $STORY1_NUM "Write Migration Scripts" "
+./github-issue-manager.sh create-task "Write Migration Scripts" "
 Create database migration scripts for initial schema setup.
-" "data-management" "db-schema-design"
+" --story $STORY1_NUM "db-schema-design" --epic-slug "data-management"
 
 # 4. Start working on the epic
 ./github-issue-manager.sh update-status $EPIC_NUM "In Progress"
 
 echo "Epic workflow created successfully!"
+```
+
+### Standalone Stories and Tasks
+
+```bash
+#!/bin/bash
+
+# Create a standalone story (not linked to any epic)
+STORY_RESULT=$(./github-issue-manager.sh create-story "Fix Critical Bug" "
+## Story
+As a user, I want the critical bug fixed so that the application works correctly.
+
+## Acceptance Criteria
+- [ ] Bug is identified and analyzed
+- [ ] Fix is implemented
+- [ ] Tests are added to prevent regression
+" "critical-bug-fix")
+
+STORY_NUM=$(echo "$STORY_RESULT" | jq -r '.story_number')
+echo "Created standalone story #$STORY_NUM"
+
+# Create a standalone task (quick fix, no story or epic)
+./github-issue-manager.sh create-task "Urgent hotfix" "
+Apply emergency patch to production.
+"
+
+# Create a task with just epic label (cross-cutting concern)
+./github-issue-manager.sh create-task "Update documentation" "
+Update API documentation for all endpoints.
+" --epic-slug "documentation"
 ```
 
 ### Bulk Issue Status Updates
@@ -517,7 +588,8 @@ As a $user_type, I want to $action so that $benefit.
 - Consider performance implications
 "
     
-    ./github-issue-manager.sh create-story $epic_num "$feature_name" "$story_body" "$epic_slug" "$story_slug"
+    # Use new syntax with --epic flag
+    ./github-issue-manager.sh create-story "$feature_name" "$story_body" "$story_slug" --epic $epic_num "$epic_slug"
 }
 
 # Create multiple related stories

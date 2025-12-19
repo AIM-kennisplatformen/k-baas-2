@@ -14,7 +14,7 @@
 - V1 Support for knowledge bases up to 1GB in total size (excluding media)
 
 ## 3. Security Requirements
-- V0.7 User authentication with industry-standard protocols (OAuth 2.0)
+- V0.7 User authentication with industry-standard protocols (OAuth 2.0) 
 - V0.7 Data encryption in transit (HTTPS/TLS)
 - Team-based (V0.7) and role-based (V2) access control for knowledge base editing
 - V0.7 Input validation to prevent injection attacks

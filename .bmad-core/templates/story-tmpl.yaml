@@ -5,11 +5,11 @@ template:
   version: 2.0
   output:
     format: github-issue-body
-    script_call: "github-issue-manager.sh create-story {{epic_num}} \"Story {{epic_num}}.{{story_num}}: {{story_title_short}}\" \"{{rendered_body}}\" \"{{story_slug}}\" \"{{epic_slug}}\""
+    script_call: "github-issue-manager.sh create-story {{epic_num}} \"Story {{epic_num}}.{{story_num}}: {{story_title_short}}\" \"{{rendered_body}}\" \"{{epic_slug}}\" \"{{story_slug}}\""
     # slug-creation-rules: derive from story_title_short, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 30 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), omit stop words (e.g., "the", "and", "of")
     title: "Story {{epic_num}}.{{story_num}}: {{story_title_short}}"
     labels: ["story", "epic-{{epic_num}}", "draft"]
-    milestone: "Epic {{epic_num}}"
+    # Note: Story is linked as sub-issue of epic via github-issue-manager.sh
 
 workflow:
   mode: interactive

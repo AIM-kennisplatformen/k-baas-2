@@ -82,8 +82,9 @@ List 1-3 focused stories that complete the epic:
 slug creation rules: derive from Enhancement Name,lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 20 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"), avoid stop words (e.g., "the", "and", "of")
 
 This will:
-- Create GitHub issue with epic label and milestone
+- Create GitHub issue with `epic` and `epic:<slug>` labels
 - Add to project board in Backlog column
+- Stories created later will be linked as sub-issues of this epic
 - Return epic issue number for use in subsequent story creation
 
 #### Compatibility Requirements

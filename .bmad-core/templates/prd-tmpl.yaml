@@ -169,7 +169,7 @@ sections:
 
       POST-PROCESSING: After epic details completion, for each story in this epic:
       1. First ensure epic issue exists (get epic issue number from previous step)
-      2. Create story issues using: github-issue-manager.sh create-story {{epic_number}} "Story {{epic_number}}.{{story_number}}: {{story_title}}" "{{story_body_with_acceptance_criteria}}" "{{story_slug}}" "{{epic_slug}}"
+      2. Create story issues using: github-issue-manager.sh create-story {{epic_number}} "Story {{epic_number}}.{{story_number}}: {{story_title}}" "{{story_body_with_acceptance_criteria}}" "{{epic_slug}}" "{{story_slug}}"
          slug-creation-rules: derive from story_title, lowercase, hyphens instead of spaces, alphanumeric and hyphens only, max 30 characters, use well known abbreviations where possible (e.g., "auth" for "authentication"),omit stop words (e.g., "the", "and", "of")
     elicit: true
     template: "{{epic_goal}}"

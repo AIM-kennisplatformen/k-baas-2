@@ -50,9 +50,9 @@ If this story is primarily for development infrastructure setup (CI/CD, build to
 
 - Read `.bmad-core/core-config.yaml` and resolve `qa_root` and GitHub configuration
 - **Verify GitHub CLI**: Ensure `gh` CLI is authenticated and configured
-- **Locate story issue**: Use `gh issue view {story_issue_number} --json body,title,labels,milestone` to get story details
+- **Locate story issue**: Use `gh issue view {story_issue_number} --json body,title,labels` to get story details
   - HALT if missing and ask for correct story issue number
-- **Extract story ID**: Get epic.story format from issue milestone or labels for QA file naming
+- **Extract story ID**: Get epic.story format from issue labels (e.g., `epic:foundation`, `story:user-auth`) for QA file naming
 
 ### 1) Collect QA Findings
 
